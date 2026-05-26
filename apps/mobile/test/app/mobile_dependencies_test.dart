@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/app/mobile_dependencies.dart';
 import 'package:mobile/features/approvals/data/approval_repository.dart';
+import 'package:mobile/core/security/local_auth_gate.dart';
+import 'package:mobile/core/security/secure_store.dart';
 import 'package:mobile/features/inspect/data/inspect_repository.dart';
 import 'package:mobile/features/sessions/data/session_repository.dart';
 import 'package:mobile/features/settings/data/settings_repository.dart';
@@ -53,6 +55,11 @@ void main() {
       dependencies.settingsController.repository,
       isA<DaemonSettingsRepository>(),
     );
+    expect(
+      dependencies.settingsController.localAuth,
+      isA<DeviceLocalAuthGate>(),
+    );
+    expect(dependencies.pairingController.store, isA<FlutterSecureStore>());
     expect(dependencies.hostId, 'host_local');
     expect(dependencies.activeSessionId, 'sess_active');
   });

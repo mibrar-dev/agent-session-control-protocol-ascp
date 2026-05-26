@@ -25,8 +25,16 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 ### 2026-05-26 - Mobile Riverpod provider graph
 
 - Branch: `branch-mobile-flutter-app`
-- Commit: this commit
+- Commit: `4173077`
 - Summary: continued the mobile app with Codex as orchestrator and attempted a bounded Blackbox read-only route through the cost-aware workflow; Blackbox timed out and tried an unavailable shell tool, so no external patch was applied. Added a Riverpod-backed `mobileRuntimeConfigProvider` and `mobileDependenciesProvider`, made `ContinuumMobileApp` consume provider overrides by default, and preserved explicit constructor injection plus memory fallback for focused widget tests.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: run simulator/device validation against a live ASCP host daemon endpoint, then split any remaining visual matrix or generated-provider refinements into small follow-up tickets.
+
+### 2026-05-26 - Mobile secure storage and local auth adapters
+
+- Branch: `branch-mobile-flutter-app`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and attempted an OpenCode Go advisory route through the cost-aware workflow; the first model id was unavailable and the fallback produced no useful patch, so the security integration was implemented locally. Added `FlutterSecureStore` with a mockable secure-storage driver, added `DeviceLocalAuthGate` with a mockable local-auth adapter, exposed the pairing controller's underlying secure store for dependency verification, and wired live mobile dependencies to production secure storage and device auth while keeping memory dependencies deterministic.
 - Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
 - Next likely step: run simulator/device validation against a live ASCP host daemon endpoint, then split any remaining visual matrix or generated-provider refinements into small follow-up tickets.
 

@@ -84,6 +84,7 @@ Files expected to be added or modified in this slice:
 | completed | wire controller-backed feature screens | session list/detail, approval queue, inspect list, and settings device/diagnostics screens render controller state and delegate user actions |
 | completed | add live integration and production hardening | default memory/live dependency containers wire ASCP, daemon, WebSocket, pairing, settings, and scanner boundaries; integration-style shell tests and golden smoke coverage pass |
 | completed | add Riverpod provider graph | `mobileRuntimeConfigProvider` and `mobileDependenciesProvider` provide default DI with test overrides while preserving explicit constructor injection for focused widgets |
+| completed | add production security adapters | live dependencies use Flutter secure storage for trust material and local_auth for local confirmation while memory dependencies remain deterministic for tests |
 
 ## Acceptance Criteria
 

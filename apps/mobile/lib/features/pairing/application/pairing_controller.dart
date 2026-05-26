@@ -23,6 +23,8 @@ class PairingController {
   final PairingClaimRepository? claimRepository;
   final DateTime Function() _now;
 
+  SecureStore get store => secureStore.store;
+
   PairingScreenState state = const PairingScreenState.idle();
 
   void startScanning() {

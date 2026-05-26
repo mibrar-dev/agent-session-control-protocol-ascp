@@ -8,7 +8,7 @@ The app uses a feature-first structure:
 
 - `lib/core/ascp`: exact ASCP method names, JSON-RPC envelopes, errors, event envelopes, statuses, and extension-safe parsing.
 - `lib/core/network`: HTTP and WebSocket JSON-RPC clients plus reconnect policy.
-- `lib/core/security`: local trust material, secure-store interface, and local auth gate boundary.
+- `lib/core/security`: local trust material, secure-store interface, Flutter secure-storage adapter, and local auth gate boundary.
 - `lib/core/database`: Drift-backed replay cursor persistence boundary.
 - `lib/app/mobile_dependencies.dart`: app-level memory/live dependency container that wires controllers to ASCP, daemon, scanner, and local-auth boundaries.
 - `lib/features/*`: feature-owned domain, data, application, and presentation code.
@@ -44,7 +44,7 @@ Replay cursors are stored in Drift per host and session. Session summaries, arti
 
 Riverpod owns the default app dependency graph through `mobileRuntimeConfigProvider` and `mobileDependenciesProvider`. Tests can override those providers through `ProviderScope`, while focused widget tests can still pass explicit `MobileDependencies` constructors.
 
-`MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, and the `mobile_scanner` QR scanner path.
+`MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, `FlutterSecureStore`, `DeviceLocalAuthGate`, and the `mobile_scanner` QR scanner path.
 
 ## Test Workflow
 

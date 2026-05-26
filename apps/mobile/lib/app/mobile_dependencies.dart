@@ -83,9 +83,11 @@ class MobileDependencies {
     required String activeSessionId,
     String? currentDeviceId,
     Dio? dio,
-    LocalAuthGate localAuth = const AllowingLocalAuthGate(),
+    LocalAuthGate? localAuth,
+    SecureStore secureStore = const FlutterSecureStore(),
   }) {
     final sharedDio = dio ?? Dio();
+    final resolvedLocalAuth = localAuth ?? DeviceLocalAuthGate();
     final ascpClient = HttpJsonRpcClient(dio: sharedDio, endpoint: rpcEndpoint);
 
     return MobileDependencies(
@@ -109,11 +111,11 @@ class MobileDependencies {
           adminBaseUrl: daemonAdminBaseUrl,
           currentDeviceId: currentDeviceId,
         ),
-        localAuth: localAuth,
+        localAuth: resolvedLocalAuth,
       ),
       pairingController: PairingController(
-        secureStore: MemorySecureStore(),
-        localAuth: localAuth,
+        secureStore: secureStore,
+        localAuth: resolvedLocalAuth,
         claimRepository: DaemonPairingRepository(dio: sharedDio),
       ),
       pairingScanner: const MobileScannerPairingScanner(),
