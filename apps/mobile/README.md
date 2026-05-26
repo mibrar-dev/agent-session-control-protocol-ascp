@@ -46,6 +46,11 @@ Riverpod owns the default app dependency graph through `mobileRuntimeConfigProvi
 
 `MobileDependencies.memory()` keeps deterministic in-memory controllers for tests and local shell previews. `MobileDependencies.live()` wires Dio-backed ASCP JSON-RPC repositories, daemon admin/pairing repositories, a lazy WebSocket subscription repository, `FlutterSecureStore`, `DeviceLocalAuthGate`, and the `mobile_scanner` QR scanner path.
 
+The platform shells are configured for the live mobile capabilities:
+
+- Android release manifest declares network, camera, and biometric permissions, and `MainActivity` extends `FlutterFragmentActivity` for `local_auth`.
+- iOS declares camera and Face ID usage descriptions for pairing scans and trusted-device confirmations.
+
 The default provider reads live device configuration from `--dart-define` values. Incomplete live configuration falls back to memory mode so local previews stay deterministic:
 
 ```bash

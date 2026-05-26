@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-26 - Mobile platform capability config
+
+- Branch: `branch-mobile-platform-permissions`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and attempted a low-cost OpenCode Go advisory route through the cost-aware workflow; the route timed out without file changes, so the platform readiness slice was implemented locally with TDD. Added smoke coverage for Android/iOS platform configuration, declared Android network/camera/biometric permissions, switched Android activity to `FlutterFragmentActivity` for local auth, set the app label to Continuum, and added iOS camera/Face ID usage descriptions.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: run the documented `flutter run --dart-define=...` command against a live ASCP host/daemon endpoint on a simulator or physical device.
+
 ### 2026-05-26 - Mobile trusted shell golden matrix
 
 - Branch: `branch-mobile-golden-matrix`
