@@ -64,6 +64,22 @@ flutter run \
   --dart-define=CONTINUUM_DEVICE_ID=device_mobile
 ```
 
+## iOS Simulator
+
+The Runner project supports both physical iOS devices and simulators through `SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"`. If `flutter run -d <simulator-id>` reports that Xcode cannot find the selected simulator destination, verify that Xcode has a simulator runtime matching its installed SDK:
+
+```bash
+xcodebuild -showsdks
+xcrun simctl list runtimes
+flutter devices -v
+```
+
+For Xcode 26.3 with the iOS Simulator 26.2 SDK, install the iOS 26.2 simulator runtime from Xcode > Settings > Components before launching on an iOS simulator. After the runtime is installed, rerun:
+
+```bash
+flutter run -d B42021B5-74F7-482A-8D2A-A645439C0CF2
+```
+
 ## Test Workflow
 
 Development is test-driven:

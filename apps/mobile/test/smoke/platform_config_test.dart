@@ -51,4 +51,21 @@ void main() {
       reason: 'iOS requires an explicit Face ID permission rationale.',
     );
   });
+
+  test('ios runner supports simulator destinations', () {
+    final project = File(
+      'ios/Runner.xcodeproj/project.pbxproj',
+    ).readAsStringSync();
+
+    expect(
+      project,
+      isNot(contains('SUPPORTED_PLATFORMS = iphoneos;')),
+      reason: 'The Runner scheme must not be limited to physical iOS devices.',
+    );
+    expect(
+      project,
+      contains('SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";'),
+      reason: 'Flutter run on iOS simulators needs iphonesimulator support.',
+    );
+  });
 }

@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-26 - Mobile iOS simulator destination support
+
+- Branch: `branch-mobile-ios-simulator-destination`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and kept the fix local after diagnostics showed the app project was restricted to physical iOS platforms while the remaining launch failure is an Xcode runtime mismatch. Added smoke coverage for Runner simulator platform support and set Runner to support both `iphoneos` and `iphonesimulator`.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/README.md`
+- Next likely step: install the iOS 26.2 simulator runtime in Xcode > Settings > Components, then rerun `flutter run -d B42021B5-74F7-482A-8D2A-A645439C0CF2` against the live ASCP host/daemon configuration.
+
 ### 2026-05-26 - Mobile packaging metadata
 
 - Branch: `branch-mobile-packaging-metadata`

@@ -78,6 +78,7 @@ Files expected to be added or modified in this slice:
 | completed | add session controllers | in-memory session repository, session list ordering/filtering, detail timeline ordering, and send-input delegation tests pass |
 | completed | add approval queue controller | queue ordering, non-actionable visibility, response delegation, and status update tests pass |
 | completed | add ASCP and daemon-backed repository adapters | sessions, approvals, and inspect have ASCP JSON-RPC adapters; pairing and settings have loopback daemon REST adapters; focused adapter tests pass |
+| completed | restore iOS simulator destination support | Runner supports both `iphoneos` and `iphonesimulator`; smoke coverage prevents regressing to physical-device-only builds; README documents the Xcode simulator runtime check |
 | completed | add live session subscription adapter | WebSocket `sessions.subscribe` maps replay/live events into timeline events, filters by session id, and exposes `sessions.unsubscribe` cleanup |
 | completed | add Drift-backed replay cursor persistence | replay cursors are stored in a generated Drift `replay_cursors` table with host/session primary key coverage and focused tests |
 | completed | add offline metadata cache | Drift stores cached session summaries, artifact metadata, and diff metadata per host/session for reconnect recovery |
