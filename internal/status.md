@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-26 - Mobile packaging metadata
+
+- Branch: `branch-mobile-packaging-metadata`
+- Commit: this commit
+- Summary: continued the mobile app with Codex as orchestrator and used a low-cost OpenCode Go advisory route through the cost-aware workflow; the advisory route confirmed the targeted packaging cleanup and pointed out web metadata still had scaffold defaults. Added smoke coverage for package/web/Android packaging metadata, replaced the Flutter scaffold description with Continuum ASCP mobile companion metadata, removed Android Gradle TODO comments in favor of explicit package id and release-signing notes, and renamed web app metadata to Continuum.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Next likely step: run the documented `flutter run --dart-define=...` command against a live ASCP host/daemon endpoint on a simulator or physical device.
+
 ### 2026-05-26 - Mobile platform capability config
 
 - Branch: `branch-mobile-platform-permissions`

@@ -1,11 +1,11 @@
 {
-    "name": "mobile",
-    "short_name": "mobile",
+    "name": "Continuum",
+    "short_name": "Continuum",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Continuum ASCP mobile companion for trusted host pairing, live session control, approvals, artifacts, and settings.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
