@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-29 - Inspect artifact viewer parity
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: compared the mobile Inspect screen against `Continuum Design System/preview/sessio-artifact-viewer.html` after simulator feedback showed the app still rendered a flat artifact list. Rebuilt the Flutter Inspect screen into the HTML artifact viewer structure: top file bar, metadata strip, pending/risk badges, files drawer row, left file tree, diff viewer with line numbers and added/removed rows, and bottom action bar. Verified on the iPhone 16 Plus simulator that Inspect now renders the artifact/diff viewer instead of repeated artifact cards.
+- Documentation updated: `internal/status.md`
+- Next likely step: wire artifact detail fields and real diff hunks into the viewer instead of the current HTML-parity fallback diff content.
+
 ### 2026-05-29 - Live iOS QA report and adaptive shell verification
 
 - Branch: `codex/mobile-live-session-detail`

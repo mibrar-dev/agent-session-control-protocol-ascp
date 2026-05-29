@@ -6,12 +6,24 @@ import 'package:mobile/features/inspect/domain/inspect_item.dart';
 import 'package:mobile/features/inspect/presentation/inspect_screen.dart';
 
 void main() {
-  testWidgets('inspect screen renders artifact and diff label', (tester) async {
-    await tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: InspectScreen()),
+  testWidgets('inspect screen renders artifact viewer chrome', (tester) async {
+    final controller = InspectController(
+      repository: MemoryInspectRepository(
+        items: const [InspectItem.diff('diff_1')],
+      ),
     );
 
-    expect(find.text('Inspect artifacts and diffs'), findsOneWidget);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: InspectScreen(controller: controller),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('middleware.ts'), findsOneWidget);
+    expect(find.text('Pending approval'), findsOneWidget);
+    expect(find.text('Approve patch'), findsOneWidget);
   });
 
   testWidgets('inspect screen renders prioritized inspect items', (
