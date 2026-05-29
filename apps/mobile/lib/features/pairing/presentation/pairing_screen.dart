@@ -145,7 +145,7 @@ class _PairingScreenState extends State<PairingScreen> {
           _ActionButton(
             label: 'Try again',
             variant: _ButtonVariant.danger,
-            onTap: () => setState(widget.controller.cancel),
+            onTap: _resetToIdle,
           ),
         ],
       );
@@ -289,6 +289,12 @@ class _PairingScreenState extends State<PairingScreen> {
     if (mounted) {
       setState(() => _claiming = false);
     }
+  }
+
+  void _resetToIdle() {
+    _textController.clear();
+    _focusNode.unfocus();
+    setState(widget.controller.cancel);
   }
 
   String _failureLabel(PairingFailure? failure) {

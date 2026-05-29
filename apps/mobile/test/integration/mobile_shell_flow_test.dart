@@ -174,7 +174,7 @@ void main() {
     await tester.tap(find.text('Continue'));
     await tester.pump();
 
-    expect(find.text('Trusted host'), findsOneWidget);
+    expect(find.text('ASCP Protocol Controller'), findsOneWidget);
     expect(find.text('Sessions'), findsWidgets);
   });
 
@@ -200,7 +200,7 @@ void main() {
     await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
     await tester.pumpAndSettle();
 
-    expect(find.text('Trusted host'), findsOneWidget);
+    expect(find.text('ASCP Protocol Controller'), findsOneWidget);
     expect(find.text('Connected'), findsOneWidget);
   });
 }

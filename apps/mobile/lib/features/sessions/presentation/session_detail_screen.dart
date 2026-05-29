@@ -52,7 +52,9 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       future: _load,
       builder: (context, snapshot) {
         return DecoratedBox(
-          decoration: const BoxDecoration(color: SessionColors.pageBackground),
+          decoration: const BoxDecoration(
+            color: ContinuumColorTokens.bgSurface,
+          ),
           child: Column(
             children: [
               _SessionHeader(sessionId: widget.sessionId),
@@ -107,7 +109,7 @@ class _SessionHeader extends StatelessWidget {
               const Text(
                 'Live feed',
                 style: TextStyle(
-                  color: SessionColors.textDark,
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.2,
@@ -142,7 +144,7 @@ class _SessionHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: SessionColors.textMuted,
+              color: ContinuumColorTokens.mutedText,
               fontSize: 11,
               fontFamily: 'monospace',
             ),
@@ -167,7 +169,7 @@ class _DateDivider extends StatelessWidget {
           Text(
             label.toUpperCase(),
             style: const TextStyle(
-              color: SessionColors.textMuted,
+              color: ContinuumColorTokens.mutedText,
               fontSize: 11,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.4,
@@ -176,7 +178,7 @@ class _DateDivider extends StatelessWidget {
           const SizedBox(width: 10),
           const Expanded(
             child: DecoratedBox(
-              decoration: BoxDecoration(color: SessionColors.borderLight),
+              decoration: BoxDecoration(color: ContinuumColorTokens.border),
               child: SizedBox(height: 1),
             ),
           ),
@@ -296,7 +298,7 @@ class _AgentMessage extends StatelessWidget {
             Text(
               _eventTitle(event.label),
               style: const TextStyle(
-                color: SessionColors.textMuted,
+                color: ContinuumColorTokens.mutedText,
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.1,
@@ -307,7 +309,7 @@ class _AgentMessage extends StatelessWidget {
               Text(
                 detail,
                 style: const TextStyle(
-                  color: Color(0xFF2A1F12),
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 15,
                   height: 1.6,
                 ),
@@ -337,11 +339,11 @@ class _ToolCard extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 340),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: SessionColors.cardSurface,
+            color: ContinuumColorTokens.bgElevated,
             border: Border.all(
               color: blocked
                   ? ContinuumColorTokens.danger.withValues(alpha: 0.35)
-                  : SessionColors.borderCard,
+                  : ContinuumColorTokens.border,
             ),
             borderRadius: BorderRadius.circular(14),
           ),
@@ -360,7 +362,7 @@ class _ToolCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: SessionColors.textMuted,
+                          color: ContinuumColorTokens.mutedText,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -376,7 +378,7 @@ class _ToolCard extends StatelessWidget {
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: SessionColors.textMuted,
+                      color: ContinuumColorTokens.mutedText,
                       fontSize: 12,
                       height: 1.4,
                     ),
@@ -635,7 +637,7 @@ class _TerminalBlock extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: const Color(0xFF1E1B16),
-            border: Border.all(color: SessionColors.borderCard),
+            border: Border.all(color: ContinuumColorTokens.border),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Padding(
@@ -671,7 +673,7 @@ class _TerminalBlock extends StatelessWidget {
                     const Text(
                       'Terminal',
                       style: TextStyle(
-                        color: SessionColors.textDark,
+                        color: ContinuumColorTokens.textPrimary,
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
                       ),
@@ -741,8 +743,8 @@ class _GenericEvent extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 340),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: SessionColors.cardSurface,
-            border: Border.all(color: SessionColors.borderCard),
+            color: ContinuumColorTokens.bgElevated,
+            border: Border.all(color: ContinuumColorTokens.border),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Padding(
@@ -781,7 +783,7 @@ class _GenericEvent extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: SessionColors.textDark,
+                          color: ContinuumColorTokens.textPrimary,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                         ),
@@ -821,7 +823,7 @@ class _GenericEvent extends StatelessWidget {
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: SessionColors.textSecondary,
+                      color: ContinuumColorTokens.mutedText,
                       fontSize: 13,
                       height: 1.35,
                     ),
@@ -853,11 +855,11 @@ class _InputBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14, 8, 14, 24),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: SessionColors.cardSurface,
+          color: ContinuumColorTokens.bgElevated,
           border: Border.all(
             color: focusNode.hasFocus
                 ? ContinuumColorTokens.accent
-                : SessionColors.borderLight,
+                : ContinuumColorTokens.border,
           ),
           borderRadius: BorderRadius.circular(ContinuumRadiusTokens.xl),
         ),
@@ -870,12 +872,12 @@ class _InputBar extends StatelessWidget {
                 controller: controller,
                 focusNode: focusNode,
                 style: const TextStyle(
-                  color: SessionColors.textDark,
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 15,
                   height: 1.35,
                 ),
                 cursorColor: ContinuumColorTokens.accent,
-                backgroundCursorColor: SessionColors.borderLight,
+                backgroundCursorColor: ContinuumColorTokens.border,
                 minLines: 1,
                 maxLines: 4,
                 keyboardType: TextInputType.multiline,
@@ -890,7 +892,7 @@ class _InputBar extends StatelessWidget {
                   const Text(
                     'Quick',
                     style: TextStyle(
-                      color: SessionColors.textMuted,
+                      color: ContinuumColorTokens.mutedText,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -935,7 +937,7 @@ class _AgentAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: SessionColors.warmSurface,
+        color: ContinuumColorTokens.bgOverlay,
         borderRadius: BorderRadius.circular(8),
       ),
       child: const SizedBox(
@@ -945,7 +947,7 @@ class _AgentAvatar extends StatelessWidget {
           child: Text(
             'A',
             style: TextStyle(
-              color: SessionColors.textMuted,
+              color: ContinuumColorTokens.mutedText,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
@@ -1019,7 +1021,7 @@ class _MutedCopy extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: SessionColors.textMuted,
+          color: ContinuumColorTokens.mutedText,
           fontSize: 14,
           height: 1.45,
         ),

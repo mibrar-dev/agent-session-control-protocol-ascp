@@ -246,6 +246,35 @@ void main() {
     expect(find.text('Try again'), findsOneWidget);
   });
 
+  testWidgets('pairing retry clears stale manual input', (tester) async {
+    final controller = PairingController(
+      secureStore: _FakeSecureStore(),
+      localAuth: _AllowingAuth(),
+      pollSimulator: _DeterministicPoll(PairingPollState.rejected),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      ),
+    );
+
+    await tester.tap(find.text('Enter code manually'));
+    await tester.pump();
+    await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:REJECT');
+    await tester.tap(find.text('Verify'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Try again'));
+    await tester.pump();
+    await tester.tap(find.text('Enter code manually'));
+    await tester.pump();
+
+    final input = tester.widget<EditableText>(find.byType(EditableText));
+    expect(input.controller.text, isEmpty);
+  });
+
   testWidgets('pairing screen shows expired error', (tester) async {
     final controller = PairingController(
       secureStore: _FakeSecureStore(),

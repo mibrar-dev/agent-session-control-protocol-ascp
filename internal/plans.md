@@ -95,6 +95,7 @@ Files expected to be added or modified in this slice:
 | completed | harden live inspect empty states | artifact/diff list calls degrade to an empty inspect state for unsupported or missing live metadata instead of showing a load failure |
 | completed | align pairing and composer UI with HTML design system | first-run pairing card matches `component-pairing.html` state structure, removes nested card framing, improves manual code input styling, and updates the live session send composer with focus-aware field/button styling |
 | completed | rebuild mobile screens from HTML design system | external OpenCode/Kiro/Blackbox routes were exercised with Codex as reviewer; Home, Sessions, session detail, Approvals, Inspect, and Settings were restyled toward the HTML references, duplicate shell headers were removed, approval empty-state counts were corrected, widget coverage was added, and simulator QA verified the trusted tab flow |
+| completed | run live iOS simulator QA and produce evidence report | real daemon pairing, trusted-shell navigation, sessions, live WebSocket input, approvals, inspect, settings, adaptive dark UI, screenshot evidence, and PDF report are verified; stale pairing retry input bug is fixed with widget coverage |
 
 ## Acceptance Criteria
 
@@ -109,4 +110,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next backend-connected interaction slice. The current HTML parity pass rebuilt the major mobile screens and fixed simulator-observed UI inconsistencies; the next likely work is wiring the dashboard paired-device inventory and approval/settings toggles to live daemon data instead of static placeholders.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The live iOS QA pass verified real daemon pairing, session navigation, WebSocket input, approvals, inspect, settings, and adaptive dark UI evidence. The next likely work is reducing trusted-device list duplication in local daemon test data and adding automated XCUITest coverage for the same live simulator path.

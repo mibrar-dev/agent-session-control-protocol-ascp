@@ -146,7 +146,9 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
       final sessions = await _dependencies.sessionListController.load();
       final approvals = await _dependencies.approvalQueueController.loadQueue();
       final runningCount = sessions.where((s) => s.status == 'running').length;
-      final pendingCount = approvals.where((a) => a.status == ApprovalStatus.pending).length;
+      final pendingCount = approvals
+          .where((a) => a.status == ApprovalStatus.pending)
+          .length;
       if (mounted) {
         setState(() {
           _tabs = [
@@ -185,7 +187,7 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
   Widget build(BuildContext context) {
     final active = _tabs[_index];
     return ColoredBox(
-      color: SessionColors.pageBackground,
+      color: ContinuumColorTokens.bgSurface,
       child: SafeArea(
         child: Column(
           children: [
@@ -275,7 +277,7 @@ class _TrustedTabView extends StatelessWidget {
               child: Text(
                 selectedSession!.title,
                 style: const TextStyle(
-                  color: SessionColors.textDark,
+                  color: ContinuumColorTokens.textPrimary,
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
@@ -760,10 +762,7 @@ class _DashboardDeviceRow extends StatelessWidget {
                 width: 32,
                 height: 32,
                 child: Center(
-                  child: Text(
-                    '🖥',
-                    style: TextStyle(fontSize: 14),
-                  ),
+                  child: Text('🖥', style: TextStyle(fontSize: 14)),
                 ),
               ),
             ),
@@ -827,9 +826,13 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        color: SessionColors.cardSurface,
-        border: Border(top: BorderSide(color: SessionColors.borderLight)),
+      decoration: BoxDecoration(
+        color: ContinuumColorTokens.bgElevated,
+        border: Border.all(color: ContinuumColorTokens.border),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(ContinuumRadiusTokens.lg),
+          topRight: Radius.circular(ContinuumRadiusTokens.lg),
+        ),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -876,7 +879,9 @@ class _NavButton extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 2),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected ? SessionColors.warmSurface : null,
+            color: selected
+                ? ContinuumColorTokens.accent.withValues(alpha: 0.12)
+                : null,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Stack(
@@ -888,7 +893,9 @@ class _NavButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: selected ? SessionColors.textDark : SessionColors.textMuted,
+                  color: selected
+                      ? ContinuumColorTokens.accent
+                      : ContinuumColorTokens.mutedText,
                   fontSize: 11,
                   fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
                 ),
@@ -898,12 +905,18 @@ class _NavButton extends StatelessWidget {
                   top: -4,
                   right: 2,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
                     decoration: BoxDecoration(
                       color: ContinuumColorTokens.danger,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    constraints: const BoxConstraints(minWidth: 14, minHeight: 14),
+                    constraints: const BoxConstraints(
+                      minWidth: 14,
+                      minHeight: 14,
+                    ),
                     child: Text(
                       badgeCount > 9 ? '9+' : '$badgeCount',
                       style: const TextStyle(
@@ -954,7 +967,7 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: SessionColors.pageBackground,
+      color: ContinuumColorTokens.bgSurface,
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -973,7 +986,7 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
                 'ASCP companion',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: SessionColors.textMuted,
+                  color: ContinuumColorTokens.mutedText,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -998,7 +1011,7 @@ class _Header extends StatelessWidget {
           child: Text(
             'Continuum',
             style: TextStyle(
-              color: SessionColors.textDark,
+              color: ContinuumColorTokens.textPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),

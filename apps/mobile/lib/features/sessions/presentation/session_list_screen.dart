@@ -24,7 +24,9 @@ class SessionListScreen extends StatelessWidget {
       builder: (context, snapshot) {
         final sessions = snapshot.data;
         return DecoratedBox(
-          decoration: const BoxDecoration(color: SessionColors.pageBackground),
+          decoration: const BoxDecoration(
+            color: ContinuumColorTokens.bgSurface,
+          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: _SessionScreenFrame(
@@ -59,7 +61,7 @@ class _SessionScreenFrame extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              color: SessionColors.textDark,
+              color: ContinuumColorTokens.textPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w700,
               letterSpacing: -0.3,
@@ -125,8 +127,8 @@ class _SessionItem extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: SessionColors.cardSurface,
-          border: Border.all(color: SessionColors.borderCard),
+          color: ContinuumColorTokens.bgElevated,
+          border: Border.all(color: ContinuumColorTokens.border),
           borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
         ),
         child: Padding(
@@ -144,7 +146,7 @@ class _SessionItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: SessionColors.textDark,
+                        color: ContinuumColorTokens.textPrimary,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.1,
@@ -156,7 +158,7 @@ class _SessionItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: SessionColors.textMuted,
+                        color: ContinuumColorTokens.mutedText,
                         fontSize: 11,
                         fontFamily: 'monospace',
                       ),
@@ -301,7 +303,7 @@ class _MutedCopy extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: SessionColors.textMuted,
+          color: ContinuumColorTokens.mutedText,
           fontSize: 14,
           height: 1.45,
         ),

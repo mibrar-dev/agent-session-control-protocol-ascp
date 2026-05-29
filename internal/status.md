@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-29 - Live iOS QA report and adaptive shell verification
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: this commit
+- Summary: used Codex as orchestrator/reviewer with prior Kiro adaptive UI implementation and Blackbox QA matrix planning, then ran the real ASCP daemon on `127.0.0.1:8765` with pairing admin on `127.0.0.1:8767`. Verified iPhone 16 Plus simulator live pairing with manual code entry, host approval, iOS passcode confirmation, connected Home, Sessions, live session detail, `sessions.send_input`/WebSocket events, Approvals, Inspect, and Settings. Fixed a simulator-observed retry bug where failed manual pairing retained stale input before the next attempt. Generated a screenshot-backed PDF QA report at `apps/mobile/qa-reports/2026-05-29-live-ios/continuum-mobile-live-ios-qa-report-2026-05-29.pdf`.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/qa-reports/2026-05-29-live-ios/report.md`
+- Next likely step: turn this manual simulator evidence path into repeatable XCUITest coverage and clean up accumulated local daemon trusted-device/pairing test data.
+
 ### 2026-05-29 - Dashboard live data wiring and bottom nav badges
 
 - Branch: `codex/mobile-live-session-detail`
