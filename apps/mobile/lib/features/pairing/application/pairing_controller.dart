@@ -10,6 +10,8 @@ class PairingController {
     required LocalAuthGate localAuth,
     this.pollSimulator,
     this.claimRepository,
+    this.repositoryPollInterval = const Duration(seconds: 1),
+    this.repositoryMaxPollAttempts = 60,
     DateTime Function()? now,
   }) : assert(
          pollSimulator != null || claimRepository != null,
@@ -21,6 +23,8 @@ class PairingController {
   final SecureWriteGate secureStore;
   final PairingPollSimulator? pollSimulator;
   final PairingClaimRepository? claimRepository;
+  final Duration repositoryPollInterval;
+  final int repositoryMaxPollAttempts;
   final DateTime Function() _now;
 
   SecureStore get store => secureStore.store;
@@ -94,8 +98,20 @@ class PairingController {
         claimedAt: _now(),
       );
       state = PairingScreenState.claiming(ticket.claim);
-      final outcome = await repository.poll(ticket);
+      var outcome = await repository.poll(ticket);
       state = PairingScreenState.polling(ticket.claim, outcome.pollState);
+      for (
+        var attempt = 1;
+        outcome.pollState == PairingPollState.pending &&
+            attempt < repositoryMaxPollAttempts;
+        attempt += 1
+      ) {
+        if (repositoryPollInterval > Duration.zero) {
+          await Future<void>.delayed(repositoryPollInterval);
+        }
+        outcome = await repository.poll(ticket);
+        state = PairingScreenState.polling(ticket.claim, outcome.pollState);
+      }
       await _applyPollOutcome(claim: ticket.claim, outcome: outcome);
     } on Object {
       state = const PairingScreenState.failed(PairingFailure.unreachableHost);

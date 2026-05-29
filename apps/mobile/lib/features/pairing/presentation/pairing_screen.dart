@@ -80,6 +80,18 @@ class _PairingScreenState extends State<PairingScreen> {
               label: 'Cancel',
               onTap: () => setState(widget.controller.cancel),
             ),
+          ] else if (state.isPolling) ...[
+            const Text('Waiting for host approval', style: _titleStyle),
+            const SizedBox(height: 8),
+            const Text(
+              'Approve this device on the host to finish pairing.',
+              style: _bodyStyle,
+            ),
+            const SizedBox(height: 12),
+            _ActionText(
+              label: 'Cancel',
+              onTap: () => setState(widget.controller.cancel),
+            ),
           ] else if (state.isManualInput) ...[
             _ManualInput(controller: _textController, focusNode: _focusNode),
             const SizedBox(height: 12),

@@ -64,6 +64,21 @@ flutter run \
   --dart-define=CONTINUUM_DEVICE_ID=device_mobile
 ```
 
+For local simulator pairing, create host pairing codes with the scopes the mobile shell needs. A code created with no `requested_scopes` can pair the device but will be forbidden from loading sessions or sending input.
+
+```bash
+ASCP_HOST=127.0.0.1 ASCP_PORT=9875 ASCP_ADMIN_PORT=9876 \
+  ASCP_DATABASE_PATH=/private/tmp/continuum-mobile-live.sqlite \
+  npm --workspace @ascp/host-daemon run start
+
+curl -s -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{"requested_scopes":["read:hosts","read:runtimes","read:sessions","write:sessions","read:approvals","write:approvals","read:artifacts"]}' \
+  http://127.0.0.1:9876/admin/pairing/sessions
+```
+
+Enter the returned code in the simulator as `127.0.0.1:9876:<PAIR-CODE>`, then approve the returned session through the daemon admin endpoint.
+
 ## iOS Simulator
 
 The Runner project supports both physical iOS devices and simulators through `SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"`. If `flutter run -d <simulator-id>` reports that Xcode cannot find the selected simulator destination, verify that Xcode has a simulator runtime matching its installed SDK:

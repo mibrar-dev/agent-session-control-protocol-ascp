@@ -159,6 +159,32 @@ void main() {
     expect(find.text('Continue'), findsOneWidget);
   });
 
+  testWidgets('pairing screen shows pending host approval state', (
+    tester,
+  ) async {
+    final controller = PairingController(
+      secureStore: _FakeSecureStore(),
+      localAuth: _AllowingAuth(),
+      pollSimulator: _DeterministicPoll(PairingPollState.pending),
+    );
+
+    await controller.submitPayload(
+      'continuum://pair?host=http%3A%2F%2F127.0.0.1%3A8765&code=PENDING',
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: PairingScreen(controller: controller, scanner: _NullScanner()),
+      ),
+    );
+
+    expect(find.text('Waiting for host approval'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Scan QR code'), findsNothing);
+    expect(find.text('Enter code manually'), findsNothing);
+  });
+
   testWidgets('pairing screen notifies parent when trusted continue tapped', (
     tester,
   ) async {

@@ -41,9 +41,13 @@ class _DeterministicPollSimulator implements PairingPollSimulator {
 }
 
 class _FakePairingClaimRepository implements PairingClaimRepository {
-  _FakePairingClaimRepository(this.outcome);
+  _FakePairingClaimRepository(this.outcomes);
 
-  final PairingPollOutcome outcome;
+  factory _FakePairingClaimRepository.single(PairingPollOutcome outcome) {
+    return _FakePairingClaimRepository([outcome]);
+  }
+
+  final List<PairingPollOutcome> outcomes;
   final List<PairingPayload> claims = [];
   final List<PairingClaimTicket> polls = [];
 
@@ -68,7 +72,10 @@ class _FakePairingClaimRepository implements PairingClaimRepository {
   @override
   Future<PairingPollOutcome> poll(PairingClaimTicket ticket) async {
     polls.add(ticket);
-    return outcome;
+    if (polls.length <= outcomes.length) {
+      return outcomes[polls.length - 1];
+    }
+    return outcomes.last;
   }
 }
 
@@ -280,7 +287,7 @@ void main() {
     'controller can claim and poll through daemon pairing repository',
     () async {
       final store = _FakeSecureStore();
-      final repository = _FakePairingClaimRepository(
+      final repository = _FakePairingClaimRepository.single(
         const PairingPollOutcome(
           pollState: PairingPollState.approved,
           trustMaterial: TrustMaterial(
@@ -305,6 +312,39 @@ void main() {
       expect(controller.state.isTrusted, isTrue);
       expect(controller.state.trustMaterial!.hostId, 'host_live');
       expect((await store.readTrustMaterial())!.secret, 'secret_live');
+    },
+  );
+
+  test(
+    'controller keeps polling repository until host approval is available',
+    () async {
+      final store = _FakeSecureStore();
+      final repository = _FakePairingClaimRepository([
+        const PairingPollOutcome(pollState: PairingPollState.pending),
+        const PairingPollOutcome(
+          pollState: PairingPollState.approved,
+          trustMaterial: TrustMaterial(
+            hostId: 'host_live',
+            deviceId: 'device_live',
+            secret: 'secret_live',
+          ),
+        ),
+      ]);
+      final controller = PairingController(
+        secureStore: store,
+        localAuth: _AllowingAuth(),
+        claimRepository: repository,
+        repositoryPollInterval: Duration.zero,
+        repositoryMaxPollAttempts: 2,
+      );
+
+      await controller.submitPayload(
+        'continuum://pair?host=http%3A%2F%2F127.0.0.1%3A8765&code=LIVE',
+      );
+
+      expect(repository.polls, hasLength(2));
+      expect(controller.state.isTrusted, isTrue);
+      expect((await store.readTrustMaterial())!.deviceId, 'device_live');
     },
   );
 
