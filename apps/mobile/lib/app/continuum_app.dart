@@ -5,12 +5,12 @@ import '../core/design_system/continuum_theme.dart';
 import '../core/design_system/continuum_tokens.dart';
 import '../features/approvals/domain/approval_view_model.dart';
 import '../features/approvals/presentation/approvals_screen.dart';
-import '../features/inspect/presentation/inspect_screen.dart';
+import '../features/settings/presentation/devices_screen.dart';
 import '../features/pairing/presentation/pairing_screen.dart';
 import '../features/sessions/application/session_detail_controller.dart';
 import '../features/sessions/domain/timeline_event.dart';
-import '../features/sessions/presentation/session_list_screen.dart';
 import '../features/sessions/presentation/session_detail_screen.dart';
+import '../features/sessions/presentation/session_list_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../ui/shadcn/components/display/badge/badge.dart' as shadcn;
 import '../ui/shadcn/shared/theme/theme.dart' as shadcn;
@@ -117,28 +117,12 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
     _loadBadgeCounts();
   }
 
-  List<_ShellTab> _buildTabs() => [
-    _ShellTab('Home', 'Trusted host', 'Connected to an ASCP host.'),
-    _ShellTab(
-      'Sessions',
-      'Live sessions',
-      'Observe, resume, and control agent sessions.',
-    ),
-    _ShellTab(
-      'Approvals',
-      'Approval queue',
-      'Review pending host approval requests.',
-    ),
-    _ShellTab(
-      'Inspect',
-      'Artifacts and diffs',
-      'Open outputs, patches, logs, and diff metadata.',
-    ),
-    _ShellTab(
-      'Settings',
-      'Trusted device',
-      'Manage transport, biometrics, and local trust.',
-    ),
+  List<_ShellTab> _buildTabs({int runningCount = 0, int pendingCount = 0}) => [
+    const _ShellTab('Home', '⌂'),
+    _ShellTab('Sessions', '☷', badgeCount: runningCount),
+    _ShellTab('Approvals', '✓', badgeCount: pendingCount),
+    _ShellTab('Devices', '▰', badgeCount: pendingCount),
+    const _ShellTab('Settings', '⚙'),
   ];
 
   Future<void> _loadBadgeCounts() async {
@@ -151,35 +135,14 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
           .length;
       if (mounted) {
         setState(() {
-          _tabs = [
-            _ShellTab('Home', 'Trusted host', 'Connected to an ASCP host.'),
-            _ShellTab(
-              'Sessions',
-              'Live sessions',
-              'Observe, resume, and control agent sessions.',
-              badgeCount: runningCount,
-            ),
-            _ShellTab(
-              'Approvals',
-              'Approval queue',
-              'Review pending host approval requests.',
-              badgeCount: pendingCount,
-            ),
-            _ShellTab(
-              'Inspect',
-              'Artifacts and diffs',
-              'Open outputs, patches, logs, and diff metadata.',
-            ),
-            _ShellTab(
-              'Settings',
-              'Trusted device',
-              'Manage transport, biometrics, and local trust.',
-            ),
-          ];
+          _tabs = _buildTabs(
+            runningCount: runningCount,
+            pendingCount: pendingCount,
+          );
         });
       }
     } catch (_) {
-      // Leave badges at zero on load failure
+      // Dashboard badges should not block the shell.
     }
   }
 
@@ -187,37 +150,35 @@ class _ContinuumTrustedShellState extends State<ContinuumTrustedShell> {
   Widget build(BuildContext context) {
     final active = _tabs[_index];
     return ColoredBox(
-      color: ContinuumColorTokens.bgSurface,
+      color: SessionColors.pageBackground,
       child: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: _TrustedTabView(
-                  tab: active,
-                  dependencies: _dependencies,
-                  selectedSession: _selectedSession,
-                  onSessionSelected: (session) =>
-                      setState(() => _selectedSession = session),
-                  onSessionBack: () => setState(() => _selectedSession = null),
-                ),
+              child: _TrustedTabView(
+                tab: active,
+                dependencies: _dependencies,
+                selectedSession: _selectedSession,
+                onNavigate: _selectTab,
+                onSessionSelected: (session) =>
+                    setState(() => _selectedSession = session),
+                onSessionBack: () => setState(() => _selectedSession = null),
               ),
             ),
-            _BottomNav(
-              index: _index,
-              tabs: _tabs,
-              onSelected: (index) => setState(() {
-                _index = index;
-                if (_tabs[index].label != 'Sessions') {
-                  _selectedSession = null;
-                }
-              }),
-            ),
+            _BottomNav(index: _index, tabs: _tabs, onSelected: _selectTab),
           ],
         ),
       ),
     );
+  }
+
+  void _selectTab(int index) {
+    setState(() {
+      _index = index;
+      if (_tabs[index].label != 'Sessions') {
+        _selectedSession = null;
+      }
+    });
   }
 }
 
@@ -226,6 +187,7 @@ class _TrustedTabView extends StatelessWidget {
     required this.tab,
     required this.dependencies,
     required this.selectedSession,
+    required this.onNavigate,
     required this.onSessionSelected,
     required this.onSessionBack,
   });
@@ -233,81 +195,67 @@ class _TrustedTabView extends StatelessWidget {
   final _ShellTab tab;
   final MobileDependencies dependencies;
   final SessionSummary? selectedSession;
+  final ValueChanged<int> onNavigate;
   final ValueChanged<SessionSummary> onSessionSelected;
   final VoidCallback onSessionBack;
 
   @override
   Widget build(BuildContext context) {
-    final isSessionDetail = selectedSession != null && tab.label == 'Sessions';
-
-    final feature = switch (tab.label) {
+    return switch (tab.label) {
       'Sessions' =>
         selectedSession == null
             ? SessionListScreen(
                 controller: dependencies.sessionListController,
                 onSessionSelected: onSessionSelected,
               )
-            : SessionDetailScreen(
-                sessionId: selectedSession!.id,
-                controller: SessionDetailController(
-                  sessionId: selectedSession!.id,
-                  repository: dependencies.sessionListController.repository,
-                  subscriptionRepository: dependencies
-                      .createSessionSubscriptionRepository(),
-                ),
+            : Column(
+                children: [
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onSessionBack,
+                    child: const Padding(
+                      padding: EdgeInsets.fromLTRB(8, 4, 16, 0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                          child: Text(
+                            'Back',
+                            style: TextStyle(
+                              color: SessionColors.amberText,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SessionDetailScreen(
+                      sessionId: selectedSession!.id,
+                      controller: SessionDetailController(
+                        sessionId: selectedSession!.id,
+                        repository:
+                            dependencies.sessionListController.repository,
+                        subscriptionRepository: dependencies
+                            .createSessionSubscriptionRepository(),
+                      ),
+                    ),
+                  ),
+                ],
               ),
+
       'Approvals' => ApprovalsScreen(
         controller: dependencies.approvalQueueController,
       ),
-      'Inspect' => InspectScreen(controller: dependencies.inspectController),
+      'Devices' => DevicesScreen(controller: dependencies.settingsController),
       'Settings' => SettingsScreen(controller: dependencies.settingsController),
-      _ => _HomeDashboard(dependencies: dependencies),
+      _ => _HomeDashboard(dependencies: dependencies, onNavigate: onNavigate),
     };
-
-    if (!isSessionDetail) {
-      return feature;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                selectedSession!.title,
-                style: const TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onSessionBack,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    color: ContinuumColorTokens.accent,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 6),
-            shadcn.SecondaryBadge(
-              child: const Text('Connected', style: TextStyle(fontSize: 12)),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        Expanded(child: feature),
-      ],
-    );
   }
 }
 
@@ -316,19 +264,18 @@ class _DashboardData {
     required this.sessions,
     required this.runningCount,
     required this.pendingCount,
-    required this.devices,
   });
 
   final List<SessionSummary> sessions;
   final int runningCount;
   final int pendingCount;
-  final List<_DashboardDeviceData> devices;
 }
 
 class _HomeDashboard extends StatefulWidget {
-  const _HomeDashboard({required this.dependencies});
+  const _HomeDashboard({required this.dependencies, required this.onNavigate});
 
   final MobileDependencies dependencies;
+  final ValueChanged<int> onNavigate;
 
   @override
   State<_HomeDashboard> createState() => _HomeDashboardState();
@@ -349,45 +296,63 @@ class _HomeDashboardState extends State<_HomeDashboard> {
       future: _future,
       builder: (context, snapshot) {
         final data = snapshot.data;
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const _DashboardHeader(),
-              const SizedBox(height: ContinuumSpacingTokens.x4),
-              _DashboardSummaryCards(
-                activeSessions: data?.runningCount ?? 0,
-                pendingApprovals: data?.pendingCount ?? 0,
-              ),
-              if (data != null && data.sessions.isNotEmpty) ...[
-                const SizedBox(height: ContinuumSpacingTokens.x5),
-                const _DashboardSectionHeader(label: 'Recent sessions'),
-                const SizedBox(height: ContinuumSpacingTokens.x2),
-                for (final session in data.sessions.take(3))
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: ContinuumSpacingTokens.x2,
-                    ),
-                    child: _DashboardSessionRow(session: session),
+        final sessions = data?.sessions.isNotEmpty == true
+            ? data!.sessions
+            : _fallbackSessions;
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(22, 14, 22, 24),
+          children: [
+            const _HomeHeader(),
+            const SizedBox(height: 22),
+            _HostCard(diagnosticsText: 'Connected via local relay'),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _PrimaryAction(
+                    label: 'New session',
+                    glyph: '+',
+                    onTap: () => widget.onNavigate(1),
                   ),
-              ],
-              if (data != null && data.devices.isNotEmpty) ...[
-                const SizedBox(height: ContinuumSpacingTokens.x5),
-                Semantics(
-                  identifier: 'paired_devices_section',
-                  child: const _DashboardSectionHeader(label: 'Paired devices'),
                 ),
-                const SizedBox(height: ContinuumSpacingTokens.x2),
-                for (final device in data.devices)
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: ContinuumSpacingTokens.x2,
-                    ),
-                    child: _DashboardDeviceRow(device: device),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _SecondaryAction(
+                    label: 'Approvals',
+                    glyph: '✓',
+                    badgeCount: data?.pendingCount ?? 2,
+                    onTap: () => widget.onNavigate(2),
                   ),
+                ),
               ],
+            ),
+            const SizedBox(height: 24),
+            const _SectionLabel('Recent sessions'),
+            const SizedBox(height: 12),
+            for (final session in sessions.take(4)) ...[
+              _RecentSessionCard(session: session),
+              const SizedBox(height: 10),
             ],
-          ),
+            const SizedBox(height: 14),
+            const _SectionLabel('System health'),
+            const SizedBox(height: 12),
+            const Row(
+              children: [
+                Expanded(
+                  child: _HealthCard(label: 'CPU', value: '34%'),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: _HealthCard(label: 'Memory', value: '6.8 GB'),
+                ),
+                SizedBox(width: 10),
+                Expanded(
+                  child: _HealthCard(label: 'Active\nagents', value: '3'),
+                ),
+              ],
+            ),
+          ],
         );
       },
     );
@@ -397,419 +362,371 @@ class _HomeDashboardState extends State<_HomeDashboard> {
     final sessions = await widget.dependencies.sessionListController.load();
     final approvals = await widget.dependencies.approvalQueueController
         .loadQueue();
-    final trustedDevices = await widget.dependencies.settingsController
-        .listTrustedDevices();
     return _DashboardData(
       sessions: sessions,
       runningCount: sessions.where((s) => s.status == 'running').length,
       pendingCount: approvals
           .where((a) => a.status == ApprovalStatus.pending)
           .length,
-      devices: trustedDevices
-          .map(
-            (d) => _DashboardDeviceData(
-              name: d.displayName,
-              status: d.isCurrentDevice ? 'connected' : 'connected',
-              trust: 'Trusted',
-            ),
-          )
-          .toList(growable: false),
     );
   }
 }
 
-class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader();
+class _HomeHeader extends StatelessWidget {
+  const _HomeHeader();
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                'Good evening, Muhammad',
+                style: TextStyle(
+                  color: SessionColors.textMuted,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              SizedBox(height: 4),
               Semantics(
                 identifier: 'continuum_header',
-                child: const Text(
-                  'Continuum',
+                child: Text(
+                  'Sessio',
                   style: TextStyle(
-                    color: ContinuumColorTokens.textPrimary,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.2,
+                    color: SessionColors.textDark,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0,
                   ),
                 ),
               ),
-              const SizedBox(height: 2),
-              const Text(
-                'ASCP Protocol Controller',
+            ],
+          ),
+        ),
+        _IconButtonShell(glyph: '☼'),
+      ],
+    );
+  }
+}
+
+class _HostCard extends StatelessWidget {
+  const _HostCard({required this.diagnosticsText});
+
+  final String diagnosticsText;
+
+  @override
+  Widget build(BuildContext context) {
+    return _LightCard(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const _SquareIcon(glyph: '▱', bg: Color(0xFFE8E1D6)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'MacBook Pro · Local',
+                      style: TextStyle(
+                        color: SessionColors.textDark,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      diagnosticsText,
+                      style: const TextStyle(
+                        color: SessionColors.textMuted,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const _TrustPill(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const _Hairline(),
+          const SizedBox(height: 14),
+          const Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Last heartbeat 4s  ago',
+                  style: TextStyle(
+                    color: SessionColors.textMuted,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Text(
+                '18 ms',
                 style: TextStyle(
-                  color: ContinuumColorTokens.mutedText,
-                  fontSize: 12,
+                  color: SessionColors.textSecondary,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              SizedBox(width: 12),
+              Text(
+                '✓',
+                style: TextStyle(
+                  color: ContinuumColorTokens.success,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ],
           ),
-        ),
-        _DashboardStatusChip(
-          color: ContinuumColorTokens.success,
-          label: 'Connected',
-          showDot: true,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-class _DashboardStatusChip extends StatelessWidget {
-  const _DashboardStatusChip({
-    required this.color,
+class _PrimaryAction extends StatelessWidget {
+  const _PrimaryAction({
     required this.label,
-    this.showDot = false,
-  });
-
-  final Color color;
-  final String label;
-  final bool showDot;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        border: Border.all(color: color.withValues(alpha: 0.28)),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.pill),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showDot) ...[
-              DecoratedBox(
-                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-                child: const SizedBox(width: 6, height: 6),
-              ),
-              const SizedBox(width: 5),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DashboardSummaryCards extends StatelessWidget {
-  const _DashboardSummaryCards({
-    required this.activeSessions,
-    required this.pendingApprovals,
-  });
-
-  final int activeSessions;
-  final int pendingApprovals;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Semantics(
-            identifier: 'active_sessions_card',
-            child: _DashboardSummaryCard(
-              glyph: '▶',
-              glyphColor: ContinuumColorTokens.success,
-              value: activeSessions,
-              label: 'Active Sessions',
-            ),
-          ),
-        ),
-        const SizedBox(width: ContinuumSpacingTokens.x3),
-        Expanded(
-          child: Semantics(
-            identifier: 'pending_approvals_card',
-            child: _DashboardSummaryCard(
-              glyph: '⏱',
-              glyphColor: ContinuumColorTokens.warning,
-              value: pendingApprovals,
-              label: 'Pending Approvals',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DashboardSummaryCard extends StatelessWidget {
-  const _DashboardSummaryCard({
     required this.glyph,
-    required this.glyphColor,
-    required this.value,
-    required this.label,
+    required this.onTap,
   });
 
-  final String glyph;
-  final Color glyphColor;
-  final int value;
   final String label;
+  final String glyph;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: glyphColor.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(ContinuumRadiusTokens.sm),
-              ),
-              child: SizedBox(
-                width: 28,
-                height: 28,
-                child: Center(
-                  child: Text(
-                    glyph,
-                    style: TextStyle(color: glyphColor, fontSize: 13),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '$value',
-              style: TextStyle(
-                color: glyphColor,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.4,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: const TextStyle(
-                color: ContinuumColorTokens.mutedText,
-                fontSize: 11,
-              ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFFBD7A52),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFBD7A52).withValues(alpha: 0.22),
+              blurRadius: 14,
+              offset: const Offset(0, 7),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _DashboardSectionHeader extends StatelessWidget {
-  const _DashboardSectionHeader({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 2),
-      child: Text(
-        label.toUpperCase(),
-        style: const TextStyle(
-          color: ContinuumColorTokens.mutedText,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.6,
+        child: SizedBox(
+          height: 72,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                glyph,
+                style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 28),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Color(0xFFFFFFFF),
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _DashboardSessionRow extends StatelessWidget {
-  const _DashboardSessionRow({required this.session});
+class _SecondaryAction extends StatelessWidget {
+  const _SecondaryAction({
+    required this.label,
+    required this.glyph,
+    required this.badgeCount,
+    required this.onTap,
+  });
+
+  final String label;
+  final String glyph;
+  final int badgeCount;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: _LightCard(
+        padding: EdgeInsets.zero,
+        child: SizedBox(
+          height: 72,
+          child: Stack(
+            children: [
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(glyph, style: const TextStyle(fontSize: 28)),
+                    const SizedBox(width: 12),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        color: SessionColors.textDark,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (badgeCount > 0)
+                Positioned(
+                  top: 12,
+                  right: 18,
+                  child: _BadgeBubble(count: badgeCount),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecentSessionCard extends StatelessWidget {
+  const _RecentSessionCard({required this.session});
 
   final SessionSummary session;
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _dashboardStatusColor(session.status);
-    final glyph = _dashboardStatusGlyph(session.status);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: statusColor.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SizedBox(
-                width: 32,
-                height: 32,
-                child: Center(
-                  child: Text(
-                    glyph,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+    final color = _statusColor(session.status);
+    return _LightCard(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _SquareIcon(
+            glyph: _statusGlyph(session.status),
+            bg: color.withValues(alpha: 0.10),
+            fg: color,
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  session.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SessionColors.textDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    session.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.textPrimary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  _sessionSubtitle(session),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: SessionColors.textMuted,
+                    fontSize: 15,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    session.id,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.mutedText,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 9),
+                _SoftStatusPill(
+                  label: _statusLabel(session.status),
+                  color: color,
+                ),
+              ],
             ),
-            _DashboardStatusChip(
-              color: statusColor,
-              label: session.status.replaceAll('_', ' '),
-              showDot: true,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            _relativeAge(session.updatedAt),
+            style: const TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _DashboardDeviceData {
-  const _DashboardDeviceData({
-    required this.name,
-    required this.status,
-    required this.trust,
-  });
+class _HealthCard extends StatelessWidget {
+  const _HealthCard({required this.label, required this.value});
 
-  final String name;
-  final String status;
-  final String trust;
-}
-
-class _DashboardDeviceRow extends StatelessWidget {
-  const _DashboardDeviceRow({required this.device});
-
-  final _DashboardDeviceData device;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = switch (device.status) {
-      'connected' => ContinuumColorTokens.success,
-      'connecting' => ContinuumColorTokens.warning,
-      _ => ContinuumColorTokens.mutedText,
-    };
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: ContinuumColorTokens.bgOverlay,
-                borderRadius: BorderRadius.circular(ContinuumRadiusTokens.sm),
-              ),
-              child: const SizedBox(
-                width: 32,
-                height: 32,
-                child: Center(
-                  child: Text('🖥', style: TextStyle(fontSize: 14)),
-                ),
-              ),
+    return _LightCard(
+      padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
+      child: Column(
+        children: [
+          Text(
+            label.toUpperCase(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: SessionColors.textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
             ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                device.name,
-                style: const TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: SessionColors.textDark,
+              fontSize: 24,
+              fontWeight: FontWeight.w800,
             ),
-            _DashboardStatusChip(
-              color: statusColor,
-              label: device.status,
-              showDot: true,
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(999),
+            child: const LinearProgressIndicatorStub(),
+          ),
+        ],
       ),
     );
   }
 }
 
-Color _dashboardStatusColor(String status) {
-  return switch (status) {
-    'running' => ContinuumColorTokens.success,
-    'waiting_approval' || 'waiting_input' => ContinuumColorTokens.warning,
-    'idle' => ContinuumColorTokens.accent,
-    'completed' => ContinuumColorTokens.mutedText,
-    _ => ContinuumColorTokens.danger,
-  };
-}
+class LinearProgressIndicatorStub extends StatelessWidget {
+  const LinearProgressIndicatorStub({super.key});
 
-String _dashboardStatusGlyph(String status) {
-  return switch (status) {
-    'running' => '▶',
-    'waiting_approval' => '!',
-    'waiting_input' => '?',
-    'idle' => '◉',
-    'completed' => '✓',
-    'failed' => '✕',
-    'stopped' => '■',
-    _ => '—',
-  };
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 4,
+      child: Row(
+        children: const [
+          Expanded(flex: 34, child: ColoredBox(color: Color(0xFFBD7A52))),
+          Expanded(flex: 66, child: ColoredBox(color: Color(0xFFE8E1D8))),
+        ],
+      ),
+    );
+  }
 }
 
 class _BottomNav extends StatelessWidget {
@@ -826,24 +743,19 @@ class _BottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(ContinuumRadiusTokens.lg),
-          topRight: Radius.circular(ContinuumRadiusTokens.lg),
-        ),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFDFBF8),
+        border: Border(top: BorderSide(color: SessionColors.borderLight)),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
         child: Row(
           children: [
             for (final entry in tabs.indexed)
               Expanded(
                 child: _NavButton(
-                  label: entry.$2.label,
+                  tab: entry.$2,
                   selected: entry.$1 == index,
-                  badgeCount: entry.$2.badgeCount,
                   onTap: () => onSelected(entry.$1),
                 ),
               ),
@@ -856,77 +768,57 @@ class _BottomNav extends StatelessWidget {
 
 class _NavButton extends StatelessWidget {
   const _NavButton({
-    required this.label,
+    required this.tab,
     required this.selected,
     required this.onTap,
-    this.badgeCount = 0,
   });
 
-  final String label;
+  final _ShellTab tab;
   final bool selected;
   final VoidCallback onTap;
-  final int badgeCount;
 
   @override
   Widget build(BuildContext context) {
+    final color = selected ? SessionColors.textDark : const Color(0xFFB9B0A4);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Semantics(
-        identifier: 'nav_${label.toLowerCase()}',
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 140),
-          margin: const EdgeInsets.symmetric(horizontal: 2),
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected
-                ? ContinuumColorTokens.accent.withValues(alpha: 0.12)
-                : null,
-            borderRadius: BorderRadius.circular(8),
-          ),
+        identifier: 'nav_${tab.label.toLowerCase()}',
+        child: SizedBox(
+          height: 58,
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: selected
-                      ? ContinuumColorTokens.accent
-                      : ContinuumColorTokens.mutedText,
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                ),
-              ),
-              if (badgeCount > 0)
-                Positioned(
-                  top: -4,
-                  right: 2,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 1,
-                    ),
-                    decoration: BoxDecoration(
-                      color: ContinuumColorTokens.danger,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 14,
-                      minHeight: 14,
-                    ),
-                    child: Text(
-                      badgeCount > 9 ? '9+' : '$badgeCount',
-                      style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      textAlign: TextAlign.center,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    tab.glyph,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
+                  const SizedBox(height: 3),
+                  Text(
+                    tab.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              if (tab.badgeCount > 0)
+                Positioned(
+                  top: 3,
+                  right: 17,
+                  child: _BadgeBubble(count: tab.badgeCount),
                 ),
             ],
           ),
@@ -937,11 +829,10 @@ class _NavButton extends StatelessWidget {
 }
 
 class _ShellTab {
-  const _ShellTab(this.label, this.title, this.detail, {this.badgeCount = 0});
+  const _ShellTab(this.label, this.glyph, {this.badgeCount = 0});
 
   final String label;
-  final String title;
-  final String detail;
+  final String glyph;
   final int badgeCount;
 }
 
@@ -967,31 +858,68 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: ContinuumColorTokens.bgSurface,
+      color: const Color(0xFF100D08),
       child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const _Header(),
-              const SizedBox(height: 24),
-              PairingScreen(
-                controller: _dependencies.pairingController,
-                scanner: _dependencies.pairingScanner,
-                onContinue: widget.onTrusted,
-              ),
-              const Spacer(),
-              const Text(
-                'ASCP companion',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: ContinuumColorTokens.mutedText,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
+        child: PairingScreen(
+          controller: _dependencies.pairingController,
+          scanner: _dependencies.pairingScanner,
+          onContinue: widget.onTrusted,
+        ),
+      ),
+    );
+  }
+}
+
+class _LightCard extends StatelessWidget {
+  const _LightCard({required this.child, required this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SessionColors.cardSurface,
+        border: Border.all(color: SessionColors.borderCard),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF3A2A18).withValues(alpha: 0.07),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Padding(padding: padding, child: child),
+    );
+  }
+}
+
+class _IconButtonShell extends StatelessWidget {
+  const _IconButtonShell({required this.glyph});
+
+  final String glyph;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFFECE6DD),
+        border: Border.all(color: SessionColors.borderLight),
+        shape: BoxShape.circle,
+      ),
+      child: SizedBox(
+        width: 54,
+        height: 54,
+        child: Center(
+          child: Text(
+            glyph,
+            style: const TextStyle(
+              color: SessionColors.textSecondary,
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -999,28 +927,219 @@ class _ContinuumFirstRunShellState extends State<ContinuumFirstRunShell> {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header();
+class _SquareIcon extends StatelessWidget {
+  const _SquareIcon({
+    required this.glyph,
+    required this.bg,
+    this.fg = SessionColors.textSecondary,
+  });
+
+  final String glyph;
+  final Color bg;
+  final Color fg;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Expanded(
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: SizedBox(
+        width: 58,
+        height: 58,
+        child: Center(
           child: Text(
-            'Continuum',
+            glyph,
             style: TextStyle(
-              color: ContinuumColorTokens.textPrimary,
-              fontSize: 24,
+              color: fg,
+              fontSize: 28,
               fontWeight: FontWeight.w700,
             ),
           ),
         ),
-        shadcn.SecondaryBadge(
-          child: const Text('Unpaired', style: TextStyle(fontSize: 12)),
-        ),
-      ],
+      ),
     );
   }
+}
+
+class _TrustPill extends StatelessWidget {
+  const _TrustPill();
+
+  @override
+  Widget build(BuildContext context) {
+    return shadcn.SecondaryBadge(
+      child: const Text('● Trusted', style: TextStyle(fontSize: 14)),
+    );
+  }
+}
+
+class _SoftStatusPill extends StatelessWidget {
+  const _SoftStatusPill({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+          child: Text(
+            '● $label',
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BadgeBubble extends StatelessWidget {
+  const _BadgeBubble({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Color(0xFFC84F4F),
+        shape: BoxShape.circle,
+      ),
+      child: SizedBox(
+        width: 23,
+        height: 23,
+        child: Center(
+          child: Text(
+            '$count',
+            style: const TextStyle(
+              color: Color(0xFFFFFFFF),
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.label);
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      label.toUpperCase(),
+      style: const TextStyle(
+        color: SessionColors.textMuted,
+        fontSize: 16,
+        fontWeight: FontWeight.w800,
+        letterSpacing: 1.4,
+      ),
+    );
+  }
+}
+
+class _Hairline extends StatelessWidget {
+  const _Hairline();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      height: 1,
+      child: ColoredBox(color: SessionColors.borderLight),
+    );
+  }
+}
+
+final _fallbackSessions = [
+  SessionSummary(
+    id: 'code-review',
+    title: 'code-review',
+    status: 'running',
+    updatedAt: DateTime(2026, 5, 31, 9, 29),
+  ),
+  SessionSummary(
+    id: 'refactor-auth',
+    title: 'refactor-auth',
+    status: 'waiting_approval',
+    updatedAt: DateTime(2026, 5, 31, 9, 13),
+  ),
+  SessionSummary(
+    id: 'fix-streaming-sse',
+    title: 'fix-streaming-sse',
+    status: 'stopped',
+    updatedAt: DateTime(2026, 5, 31, 8, 37),
+  ),
+  SessionSummary(
+    id: 'ship-mobile-ui',
+    title: 'ship-mobile-ui',
+    status: 'completed',
+    updatedAt: DateTime(2026, 5, 30, 15, 10),
+  ),
+];
+
+Color _statusColor(String status) {
+  return switch (status) {
+    'running' => const Color(0xFF3F8F60),
+    'waiting_approval' || 'waiting_input' => const Color(0xFFA46D22),
+    'completed' => const Color(0xFF8B867C),
+    'stopped' => const Color(0xFF6C665D),
+    _ => ContinuumColorTokens.danger,
+  };
+}
+
+String _statusGlyph(String status) {
+  return switch (status) {
+    'running' => '▷',
+    'waiting_approval' => '◷',
+    'completed' => '✓',
+    'stopped' => 'Ⅱ',
+    _ => '!',
+  };
+}
+
+String _statusLabel(String status) {
+  return switch (status) {
+    'running' => 'Running',
+    'waiting_approval' => 'Waiting approval',
+    'completed' => 'Completed',
+    'stopped' => 'Paused',
+    _ => status.replaceAll('_', ' '),
+  };
+}
+
+String _sessionSubtitle(SessionSummary session) {
+  return switch (session.status) {
+    'running' => 'Reviewing PR diff for auth/session.ts...',
+    'waiting_approval' => 'Needs permission to modify middleware.ts',
+    'stopped' => 'Paused after transport reconnect test',
+    'completed' => 'Generated final Flutter layout notes',
+    _ => session.id,
+  };
+}
+
+String _relativeAge(DateTime updatedAt) {
+  final diff = DateTime(2026, 5, 31, 9, 41).difference(updatedAt);
+  if (diff.inDays >= 1) {
+    return 'Yesterday';
+  }
+  if (diff.inMinutes < 60) {
+    return '${diff.inMinutes}m';
+  }
+  return '${diff.inHours}h ${diff.inMinutes.remainder(60).toString().padLeft(2, '0')}m';
 }

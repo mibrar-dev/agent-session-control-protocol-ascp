@@ -552,3 +552,12 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 - Documentation updated: `internal/plans.md`, `internal/status.md`
 - Verification: `flutter analyze` passed; `flutter test` passed with 152 tests; iOS simulator build/run passed on iPhone 16e; manual simulator QA paired with `127.0.0.1:8765:APPROVE` and confirmed the Home, Sessions, Approvals, Inspect, and Settings tab surfaces render without duplicate shell headers, with the Approvals empty state now showing `No pending actions`.
 - Next likely step: replace static dashboard paired devices and display preferences with live daemon-backed data/actions, then continue HTML parity on populated-data states.
+
+### 2026-05-31 - Mobile attached screen parity pass
+
+- Branch: `codex/mobile-live-session-detail`
+- Commit: `not committed`
+- Summary: used Codex as orchestrator/reviewer with Agent Forge subagent attempts, then finalized the Flutter UI pass for the attached mobile references. The trusted shell now has Home, Sessions, Approvals, Devices, and Settings tabs; Home, Approvals, Settings, Trusted devices, and Pairing were restyled toward the screenshots, including the dark scanner/code-entry pairing flow and the dedicated trusted devices surface.
+- Documentation updated: `internal/plans.md`, `internal/status.md`
+- Verification: `flutter analyze` passed; `flutter test` passed; `flutter_shadcn validate --json`, `flutter_shadcn audit --json`, and `flutter_shadcn deps --json` passed; XcodeBuildMCP built and launched Runner on iPhone 17 Pro and captured the updated dark pairing screenshot at `/var/folders/dt/p77q2g1j7190pw1cc_h07hg80000gn/T/screenshot_optimized_b395d82c-fb5b-48b6-8cd4-31a29ab495db.jpg`.
+- Next likely step: tighten the live session detail screen against the attached chat reference and add automated XCUITest coverage for the simulator parity path.

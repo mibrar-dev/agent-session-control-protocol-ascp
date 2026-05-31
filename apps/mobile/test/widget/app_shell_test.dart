@@ -31,7 +31,7 @@ void main() {
     expect(find.text('Home'), findsWidgets);
     expect(find.text('Sessions'), findsWidgets);
     expect(find.text('Approvals'), findsWidgets);
-    expect(find.text('Inspect'), findsWidgets);
+    expect(find.text('Devices'), findsWidgets);
     expect(find.text('Settings'), findsWidgets);
   });
 

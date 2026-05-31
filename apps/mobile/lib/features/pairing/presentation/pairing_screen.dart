@@ -47,226 +47,123 @@ class _PairingScreenState extends State<PairingScreen> {
   @override
   Widget build(BuildContext context) {
     final state = widget.controller.state;
-    return Padding(
-      padding: const EdgeInsets.all(ContinuumSpacingTokens.x5),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: _PairingCard(child: _buildCardContent(state)),
-      ),
-    );
-  }
-
-  Widget _buildCardContent(PairingScreenState state) {
-    if (_claiming) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final screenHeight = MediaQuery.maybeSizeOf(context)?.height ?? 600;
+    final compact = screenHeight < 700;
+    return ColoredBox(
+      color: const Color(0xFF100D08),
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(28, compact ? 12 : 24, 28, 30),
         children: [
-          const _StateLabel(label: 'Claiming'),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text('Claiming Device...', style: _titleStyle),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Spinner(),
-              SizedBox(width: ContinuumSpacingTokens.x2),
-              Flexible(
-                child: Text(
-                  'Establishing secure channel',
-                  style: _bodyStyle,
-                  textAlign: TextAlign.center,
+              if (!compact) ...[const _BackPlate(), const SizedBox(width: 20)],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pair a host',
+                      style: TextStyle(
+                        color: const Color(0xFFF9F2EA),
+                        fontSize: compact ? 30 : 39,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.isTrusted
+                          ? 'This device is now approved by the host.'
+                          : 'Scan the QR code shown in Sessio Bridge or enter the pairing code manually.',
+                      style: const TextStyle(
+                        color: Color(0xFF9D9286),
+                        fontSize: 18,
+                        height: 1.28,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          _ActionButton(
-            label: 'Cancel',
-            variant: _ButtonVariant.ghost,
-            onTap: () {},
-            enabled: false,
+          SizedBox(height: compact ? 12 : 34),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _scan,
+            child: _ScannerFrame(height: compact ? 180 : 360),
           ),
-        ],
-      );
-    }
-
-    if (state.isTrusted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const _StateLabel(
-            label: 'Success',
-            color: ContinuumColorTokens.success,
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const _OutcomeIcon(label: 'OK', color: ContinuumColorTokens.success),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text(
-            'Device Paired',
-            style: _titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x2),
-          const Text(
-            'This device is now trusted on this host.',
-            style: _subtleStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          _ActionButton(
-            label: 'Continue',
-            variant: _ButtonVariant.primary,
-            onTap: widget.onContinue ?? () {},
-          ),
-        ],
-      );
-    }
-
-    if (state.isFailed) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const _StateLabel(label: 'Error', color: ContinuumColorTokens.danger),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const _OutcomeIcon(label: 'X', color: ContinuumColorTokens.danger),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text(
-            'Pairing Failed',
-            style: _titleStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x2),
-          Text(
-            _failureLabel(state.failure),
-            style: _subtleStyle,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          _ActionButton(
-            label: 'Try again',
-            variant: _ButtonVariant.danger,
-            onTap: _resetToIdle,
-          ),
-        ],
-      );
-    }
-
-    if (state.isManualInput) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const _StateLabel(label: 'Code Entry'),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text('Enter Pairing Code', style: _titleStyle),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          _ManualInput(
+          SizedBox(height: compact ? 12 : 34),
+          const _OrDivider(),
+          SizedBox(height: compact ? 12 : 30),
+          _CodeEntry(
             controller: _textController,
             focusNode: _focusNode,
             onSubmitted: _submitManual,
+            boxHeight: compact ? 48 : 78,
           ),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text(
-            'Enter the pairing code shown on your host.',
-            style: _subtleStyle,
+          SizedBox(height: compact ? 12 : 28),
+          ListenableBuilder(
+            listenable: _textController,
+            builder: (context, _) {
+              return _ClaimButton(
+                label: state.isTrusted
+                    ? 'Continue'
+                    : _claiming
+                    ? 'Claiming device'
+                    : 'Claim device',
+                enabled: true,
+                height: compact ? 52 : 72,
+                onTap: state.isTrusted
+                    ? (widget.onContinue ?? () {})
+                    : _submitManual,
+              );
+            },
           ),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          Semantics(
-            identifier: 'verify_button',
-            child: _ActionButton(
-              label: 'Verify',
-              variant: _ButtonVariant.primary,
-              onTap: _submitManual,
+          SizedBox(height: compact ? 12 : 36),
+          Center(
+            child: Text(
+              _statusLabel(state),
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: state.isFailed
+                    ? ContinuumColorTokens.danger
+                    : const Color(0xFF9D9286),
+                fontSize: 16,
+                height: 1.35,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          if (!compact) ...[
+            const SizedBox(height: 24),
+            const Text(
+              'Only approve hosts you recognize. Sessio never pairs without confirmation on the host machine.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Color(0xFF8A7F73),
+                fontSize: 15,
+                height: 1.35,
+              ),
+            ),
+          ],
+          SizedBox(height: compact ? 8 : 18),
+          Center(
+            child: GestureDetector(
+              onTap: () => setState(widget.controller.startManualInput),
+              child: const Text(
+                'Enter code manually',
+                style: TextStyle(
+                  color: Color(0xFFC47C50),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
             ),
           ),
         ],
-      );
-    }
-
-    if (state.isPolling) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const _StateLabel(label: 'Waiting'),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const Text('Waiting for host approval', style: _titleStyle),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _Spinner(),
-              SizedBox(width: ContinuumSpacingTokens.x2),
-              Flexible(
-                child: Text(
-                  'Approve this device on the host to finish pairing.',
-                  style: _bodyStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x4),
-          _ActionButton(
-            label: 'Cancel',
-            variant: _ButtonVariant.ghost,
-            onTap: () => setState(widget.controller.cancel),
-          ),
-        ],
-      );
-    }
-
-    if (state.isScanning) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(
-            identifier: 'scanning_state',
-            child: const _StateLabel(label: 'Scanning'),
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          Semantics(
-            identifier: 'pair_new_device_title',
-            child: const Text('Pair New Device', style: _titleStyle),
-          ),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          const _ScanArea(),
-          const SizedBox(height: ContinuumSpacingTokens.x3),
-          _ActionButton(
-            label: 'Cancel',
-            variant: _ButtonVariant.ghost,
-            onTap: () => setState(widget.controller.cancel),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Semantics(
-          identifier: 'scanning_state',
-          child: const _StateLabel(label: 'Scanning'),
-        ),
-        const SizedBox(height: ContinuumSpacingTokens.x3),
-        Semantics(
-          identifier: 'pair_new_device_title',
-          child: const Text('Pair New Device', style: _titleStyle),
-        ),
-        const SizedBox(height: ContinuumSpacingTokens.x3),
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _scan,
-          child: const _ScanArea(),
-        ),
-        const SizedBox(height: ContinuumSpacingTokens.x3),
-        Semantics(
-          identifier: 'enter_code_manually',
-          child: _ActionButton(
-            label: 'Enter code manually',
-            variant: _ButtonVariant.ghost,
-            onTap: () => setState(widget.controller.startManualInput),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
@@ -284,6 +181,11 @@ class _PairingScreenState extends State<PairingScreen> {
   }
 
   Future<void> _submit(String payload) async {
+    if (payload.trim().isEmpty) {
+      setState(widget.controller.startManualInput);
+      _focusNode.requestFocus();
+      return;
+    }
     setState(() => _claiming = true);
     await widget.controller.submitPayload(payload);
     if (mounted) {
@@ -291,10 +193,17 @@ class _PairingScreenState extends State<PairingScreen> {
     }
   }
 
-  void _resetToIdle() {
-    _textController.clear();
-    _focusNode.unfocus();
-    setState(widget.controller.cancel);
+  String _statusLabel(PairingScreenState state) {
+    if (_claiming || state.isPolling) {
+      return '● Waiting for host approval...';
+    }
+    if (state.isTrusted) {
+      return '● Host approved this device.';
+    }
+    if (state.isFailed) {
+      return _failureLabel(state.failure);
+    }
+    return '● Waiting for host approval...';
   }
 
   String _failureLabel(PairingFailure? failure) {
@@ -310,248 +219,241 @@ class _PairingScreenState extends State<PairingScreen> {
   }
 }
 
-class _PairingCard extends StatelessWidget {
-  const _PairingCard({required this.child});
+class _ScannerFrame extends StatelessWidget {
+  const _ScannerFrame({required this.height});
 
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 220),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ContinuumColorTokens.bgElevated,
-          border: Border.all(color: ContinuumColorTokens.border),
-          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(ContinuumSpacingTokens.x4 - 2),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-class _StateLabel extends StatelessWidget {
-  const _StateLabel({
-    required this.label,
-    this.color = ContinuumColorTokens.accent,
-  });
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          child: Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 9,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ScanArea extends StatelessWidget {
-  const _ScanArea();
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgSurface,
-        border: Border.all(color: ContinuumColorTokens.border),
-        borderRadius: BorderRadius.circular(ContinuumRadiusTokens.sm + 2),
+        color: const Color(0xFF0B0906),
+        border: Border.all(color: const Color(0xFF2A221B)),
+        borderRadius: BorderRadius.circular(28),
       ),
-      child: const SizedBox(
-        height: 64,
-        child: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('QR', style: _monoMutedStyle),
-              SizedBox(width: ContinuumSpacingTokens.x2),
-              Text('Scan QR code', style: _subtleStyle),
-            ],
-          ),
+      child: SizedBox(
+        height: height,
+        child: Stack(
+          children: const [
+            Positioned.fill(child: _ScannerCorners()),
+            Center(child: _ScanBeam()),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 34,
+              child: Text(
+                'Align QR code within frame',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF9D9286),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 10,
+              child: Text(
+                'Scan QR code',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Color(0xFF4F463D),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _ManualInput extends StatelessWidget {
-  const _ManualInput({
+class _ScannerCorners extends StatelessWidget {
+  const _ScannerCorners();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _CornerPainter());
+  }
+}
+
+class _ScanBeam extends StatelessWidget {
+  const _ScanBeam();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF75E8F2),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF75E8F2).withValues(alpha: 0.70),
+            blurRadius: 22,
+            spreadRadius: 4,
+          ),
+        ],
+      ),
+      child: const SizedBox(width: 270, height: 3),
+    );
+  }
+}
+
+class _CodeEntry extends StatefulWidget {
+  const _CodeEntry({
     required this.controller,
     required this.focusNode,
     required this.onSubmitted,
+    required this.boxHeight,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final VoidCallback onSubmitted;
+  final double boxHeight;
+
+  @override
+  State<_CodeEntry> createState() => _CodeEntryState();
+}
+
+class _CodeEntryState extends State<_CodeEntry> {
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onChanged);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: focusNode,
-      builder: (context, _) {
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: ContinuumColorTokens.bgSurface,
-            border: Border.all(
-              color: focusNode.hasFocus
-                  ? ContinuumColorTokens.accent
-                  : ContinuumColorTokens.border,
-            ),
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: focusNode.hasFocus
-                ? [
-                    BoxShadow(
-                      color: ContinuumColorTokens.accent.withValues(alpha: 0.2),
-                      blurRadius: 0,
-                      spreadRadius: 2,
-                    ),
-                  ]
-                : null,
+    final code = widget.controller.text.replaceAll(RegExp(r'\s+'), '');
+    final focusIndex = code.length.clamp(0, 5).toInt();
+    return Stack(
+      children: [
+        Opacity(
+          opacity: 0.01,
+          child: EditableText(
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 18),
+            cursorColor: const Color(0xFFC47C50),
+            backgroundCursorColor: const Color(0xFF4E463D),
+            maxLines: 1,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
+            inputFormatters: [LengthLimitingTextInputFormatter(64)],
+            onSubmitted: (_) => widget.onSubmitted(),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: EditableText(
-              controller: controller,
-              focusNode: focusNode,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: ContinuumColorTokens.textPrimary,
-                fontSize: 18,
-                height: 1.2,
-                letterSpacing: 1.6,
-                fontFamily: 'monospace',
-              ),
-              cursorColor: ContinuumColorTokens.accent,
-              backgroundCursorColor: ContinuumColorTokens.border,
-              maxLines: 1,
-              keyboardType: TextInputType.text,
-              textInputAction: TextInputAction.done,
-              onSubmitted: (_) => onSubmitted(),
+        ),
+        GestureDetector(
+          onTap: widget.focusNode.requestFocus,
+          child: Row(
+            children: [
+              for (var index = 0; index < 6; index++) ...[
+                Expanded(
+                  child: _CodeBox(
+                    height: widget.boxHeight,
+                    value: index < code.length
+                        ? code[index].toUpperCase()
+                        : '—',
+                    focused: widget.focusNode.hasFocus && index == focusIndex,
+                  ),
+                ),
+                if (index < 5) const SizedBox(width: 10),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _onChanged() => setState(() {});
+}
+
+class _CodeBox extends StatelessWidget {
+  const _CodeBox({
+    required this.value,
+    required this.focused,
+    required this.height,
+  });
+
+  final String value;
+  final bool focused;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF15110D),
+        border: Border.all(
+          color: focused ? const Color(0xFFC47C50) : const Color(0xFF41372F),
+          width: focused ? 2 : 1,
+        ),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: SizedBox(
+        height: height,
+        child: Center(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Color(0xFF665B50),
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-enum _ButtonVariant { primary, ghost, danger }
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
+class _ClaimButton extends StatelessWidget {
+  const _ClaimButton({
     required this.label,
-    required this.variant,
+    required this.enabled,
     required this.onTap,
-    this.enabled = true,
+    required this.height,
   });
 
   final String label;
-  final _ButtonVariant variant;
-  final VoidCallback onTap;
   final bool enabled;
+  final VoidCallback onTap;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
-    final color = switch (variant) {
-      _ButtonVariant.primary => ContinuumColorTokens.accent,
-      _ButtonVariant.ghost => ContinuumColorTokens.textPrimary,
-      _ButtonVariant.danger => ContinuumColorTokens.danger,
-    };
-    final background = switch (variant) {
-      _ButtonVariant.primary => ContinuumColorTokens.accent,
-      _ButtonVariant.ghost => ContinuumColorTokens.bgElevated,
-      _ButtonVariant.danger => ContinuumColorTokens.danger.withValues(
-        alpha: 0.12,
-      ),
-    };
-    final border = switch (variant) {
-      _ButtonVariant.primary => ContinuumColorTokens.accent,
-      _ButtonVariant.ghost => ContinuumColorTokens.border,
-      _ButtonVariant.danger => ContinuumColorTokens.danger,
-    };
-    final textColor = variant == _ButtonVariant.primary
-        ? ContinuumColorTokens.accentForeground
-        : color;
-
-    return Opacity(
-      opacity: enabled ? 1 : 0.5,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: enabled ? onTap : null,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: background,
-            border: Border.all(color: border),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: SizedBox(
-            height: 40,
-            child: Center(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OutcomeIcon extends StatelessWidget {
-  const _OutcomeIcon({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.center,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: enabled ? onTap : null,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.12),
-          border: Border.all(color: color),
-          borderRadius: BorderRadius.circular(999),
+          color: enabled ? const Color(0xFFC47C50) : const Color(0xFF494039),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: SizedBox(
-          width: 40,
-          height: 40,
+          height: height,
           child: Center(
             child: Text(
               label,
               style: TextStyle(
-                color: color,
-                fontSize: 12,
-                fontWeight: FontWeight.w900,
+                color: enabled
+                    ? const Color(0xFF150E08)
+                    : const Color(0xFF9D9286),
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
@@ -561,45 +463,101 @@ class _OutcomeIcon extends StatelessWidget {
   }
 }
 
-class _Spinner extends StatelessWidget {
-  const _Spinner();
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 16,
-      height: 16,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ContinuumColorTokens.accent,
-          shape: BoxShape.circle,
+    return Row(
+      children: const [
+        Expanded(
+          child: SizedBox(
+            height: 1,
+            child: ColoredBox(color: Color(0xFF4B4239)),
+          ),
         ),
-      ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 18),
+          child: Text(
+            'or enter code',
+            style: TextStyle(
+              color: Color(0xFF9D9286),
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        Expanded(
+          child: SizedBox(
+            height: 1,
+            child: ColoredBox(color: Color(0xFF4B4239)),
+          ),
+        ),
+      ],
     );
   }
 }
 
-const _titleStyle = TextStyle(
-  color: ContinuumColorTokens.textPrimary,
-  fontSize: 13,
-  fontWeight: FontWeight.w700,
-);
+class _BackPlate extends StatelessWidget {
+  const _BackPlate();
 
-const _bodyStyle = TextStyle(
-  color: ContinuumColorTokens.textPrimary,
-  fontSize: 12,
-  height: 1.45,
-);
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF211B16),
+        border: Border.all(color: const Color(0xFF342A22)),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: const SizedBox(width: 72, height: 72),
+    );
+  }
+}
 
-const _subtleStyle = TextStyle(
-  color: ContinuumColorTokens.mutedText,
-  fontSize: 11,
-  height: 1.4,
-);
+class _CornerPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF020201)
+      ..strokeWidth = 4
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.square;
+    const length = 36.0;
+    const inset = 2.0;
+    canvas.drawLine(const Offset(inset, 60), const Offset(inset, 20), paint);
+    canvas.drawLine(const Offset(inset, 20), const Offset(42, 20), paint);
+    canvas.drawLine(
+      Offset(size.width - inset, 60),
+      Offset(size.width - inset, 20),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width - inset, 20),
+      Offset(size.width - 42, 20),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(inset, size.height - 60),
+      Offset(inset, size.height - 20),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(inset, size.height - 20),
+      Offset(length + inset, size.height - 20),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width - inset, size.height - 60),
+      Offset(size.width - inset, size.height - 20),
+      paint,
+    );
+    canvas.drawLine(
+      Offset(size.width - inset, size.height - 20),
+      Offset(size.width - length - inset, size.height - 20),
+      paint,
+    );
+  }
 
-const _monoMutedStyle = TextStyle(
-  color: ContinuumColorTokens.mutedText,
-  fontSize: 12,
-  fontFamily: 'monospace',
-  fontWeight: FontWeight.w700,
-);
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

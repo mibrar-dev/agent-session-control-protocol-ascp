@@ -96,6 +96,7 @@ Files expected to be added or modified in this slice:
 | completed | align pairing and composer UI with HTML design system | first-run pairing card matches `component-pairing.html` state structure, removes nested card framing, improves manual code input styling, and updates the live session send composer with focus-aware field/button styling |
 | completed | rebuild mobile screens from HTML design system | external OpenCode/Kiro/Blackbox routes were exercised with Codex as reviewer; Home, Sessions, session detail, Approvals, Inspect, and Settings were restyled toward the HTML references, duplicate shell headers were removed, approval empty-state counts were corrected, widget coverage was added, and simulator QA verified the trusted tab flow |
 | completed | run live iOS simulator QA and produce evidence report | real daemon pairing, trusted-shell navigation, sessions, live WebSocket input, approvals, inspect, settings, adaptive dark UI, screenshot evidence, and PDF report are verified; stale pairing retry input bug is fixed with widget coverage |
+| completed | align attached mobile screen designs | Agent Forge routes were used for review/implementation attempts with Codex as orchestrator and QA; the shell now exposes Home, Sessions, Approvals, Devices, and Settings; Home, Approvals, Settings, Trusted devices, and Pairing were rebuilt toward the attached screenshots; pairing uses the dark scanner/code-entry layout; tests and simulator screenshot verification pass |
 
 ## Acceptance Criteria
 
@@ -110,4 +111,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next backend-connected interaction slice. The live iOS QA pass verified real daemon pairing, session navigation, WebSocket input, approvals, inspect, settings, and adaptive dark UI evidence. The next likely work is reducing trusted-device list duplication in local daemon test data and adding automated XCUITest coverage for the same live simulator path.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest visual parity pass verified the updated attached-screen shell, dedicated Devices tab, warm light Home/Approvals/Settings surfaces, and dark pairing scanner in tests and on the iOS simulator. The next likely work is tightening the live session detail screen against the chat reference and adding automated XCUITest coverage for the same simulator path.

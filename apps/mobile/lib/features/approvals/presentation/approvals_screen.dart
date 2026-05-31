@@ -16,7 +16,7 @@ class ApprovalsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: ContinuumColorTokens.bgSurface),
+      decoration: const BoxDecoration(color: SessionColors.pageBackground),
       child: FutureBuilder<List<ApprovalViewModel>>(
         future: controller.loadQueue(),
         builder: (context, snapshot) {
@@ -66,7 +66,7 @@ class _TopBar extends StatelessWidget {
               const Text(
                 'Approvals',
                 style: TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
+                  color: SessionColors.textDark,
                   fontSize: 26,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.5,
@@ -76,7 +76,7 @@ class _TopBar extends StatelessWidget {
               Text(
                 subtitle,
                 style: const TextStyle(
-                  color: ContinuumColorTokens.mutedText,
+                  color: SessionColors.textSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -84,8 +84,8 @@ class _TopBar extends StatelessWidget {
           ),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: ContinuumColorTokens.bgOverlay,
-              border: Border.all(color: ContinuumColorTokens.border),
+              color: SessionColors.cardSurface,
+              border: Border.all(color: SessionColors.borderLight),
               borderRadius: BorderRadius.circular(10),
             ),
             child: const SizedBox(
@@ -94,10 +94,7 @@ class _TopBar extends StatelessWidget {
               child: Center(
                 child: Text(
                   '⚙',
-                  style: TextStyle(
-                    color: ContinuumColorTokens.textPrimary,
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: SessionColors.textDark, fontSize: 14),
                 ),
               ),
             ),
@@ -149,6 +146,7 @@ class _ApprovalBodyState extends State<_ApprovalBody> {
     }
 
     return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 18),
       itemCount: _approvals.length,
       separatorBuilder: (_, _) => const SizedBox(height: 14),
       itemBuilder: (context, index) => _ApprovalCard(
@@ -163,9 +161,7 @@ class _ApprovalBodyState extends State<_ApprovalBody> {
       approval: _approvals[index],
       decision: decision,
     );
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
     setState(() {
       _approvals = [
         for (final entry in _approvals.indexed)
@@ -187,50 +183,47 @@ class _ApprovalCard extends StatelessWidget {
         approval.reason.contains('high') || approval.reason.contains('system');
     final accentColor = isHighRisk
         ? ContinuumColorTokens.warning
-        : ContinuumColorTokens.accent;
+        : SessionColors.amberText;
     final accentBg = isHighRisk
         ? ContinuumColorTokens.warning.withValues(alpha: 0.12)
-        : ContinuumColorTokens.accent.withValues(alpha: 0.12);
+        : SessionColors.amberBg;
     final riskLabel = isHighRisk ? 'High risk' : 'Medium risk';
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: ContinuumColorTokens.bgElevated,
-          border: Border.all(color: ContinuumColorTokens.border),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              height: 3,
-              width: double.infinity,
-              child: ColoredBox(color: accentColor),
-            ),
-            _Header(
-              agentName: approval.sessionId,
-              sessionName: 'refactor-auth',
-              risk: riskLabel,
-              accentBg: accentBg,
-              accentText: accentColor,
-            ),
-            _CardDivider(),
-            _Body(
-              actionLabel: approval.reason,
-              description: 'Agent requested permission to perform this action.',
-              path: '/etc/hosts',
-              accentBg: accentBg,
-              accentText: accentColor,
-            ),
-            if (isHighRisk) ...[_CardDivider(), _WarningBlock()],
-            _CardDivider(),
-            _ActionRow(
-              onApprove: () => onDecision(ApprovalDecision.approved),
-              onReject: () => onDecision(ApprovalDecision.rejected),
-            ),
-          ],
-        ),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: SessionColors.cardSurface,
+        border: Border.all(color: SessionColors.borderCard),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 3,
+            width: double.infinity,
+            child: ColoredBox(color: accentColor),
+          ),
+          _Header(
+            agentName: approval.sessionId,
+            sessionName: 'refactor-auth',
+            risk: riskLabel,
+            accentBg: accentBg,
+            accentText: accentColor,
+          ),
+          const _CardDivider(),
+          _Body(
+            actionLabel: approval.reason,
+            description: 'Agent requested permission to perform this action.',
+            path: '/etc/hosts',
+            accentBg: accentBg,
+          ),
+          if (isHighRisk) ...[const _CardDivider(), const _WarningBlock()],
+          const _CardDivider(),
+          _ActionRow(
+            onApprove: () => onDecision(ApprovalDecision.approved),
+            onReject: () => onDecision(ApprovalDecision.rejected),
+          ),
+        ],
       ),
     );
   }
@@ -241,13 +234,13 @@ class _CardDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
+    return const DecoratedBox(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: ContinuumColorTokens.border, width: 0.5),
+          bottom: BorderSide(color: SessionColors.borderLight, width: 0.5),
         ),
       ),
-      child: const SizedBox(height: 1),
+      child: SizedBox(height: 1, width: double.infinity),
     );
   }
 }
@@ -285,7 +278,7 @@ class _Header extends StatelessWidget {
                 child: Text(
                   '⬡',
                   style: TextStyle(
-                    color: ContinuumColorTokens.accent,
+                    color: SessionColors.amberText,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -301,7 +294,7 @@ class _Header extends StatelessWidget {
                 Text(
                   agentName,
                   style: const TextStyle(
-                    color: ContinuumColorTokens.textPrimary,
+                    color: SessionColors.textDark,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -310,7 +303,7 @@ class _Header extends StatelessWidget {
                 Text(
                   sessionName,
                   style: const TextStyle(
-                    color: ContinuumColorTokens.mutedText,
+                    color: SessionColors.textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -347,14 +340,12 @@ class _Body extends StatelessWidget {
     required this.description,
     required this.path,
     required this.accentBg,
-    required this.accentText,
   });
 
   final String actionLabel;
   final String description;
   final String path;
   final Color accentBg;
-  final Color accentText;
 
   @override
   Widget build(BuildContext context) {
@@ -377,7 +368,7 @@ class _Body extends StatelessWidget {
                     child: Text(
                       '›',
                       style: TextStyle(
-                        color: ContinuumColorTokens.accent,
+                        color: SessionColors.amberText,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
                       ),
@@ -390,7 +381,7 @@ class _Body extends StatelessWidget {
                 child: Text(
                   actionLabel,
                   style: const TextStyle(
-                    color: ContinuumColorTokens.textPrimary,
+                    color: SessionColors.textDark,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -402,7 +393,7 @@ class _Body extends StatelessWidget {
           Text(
             description,
             style: const TextStyle(
-              color: ContinuumColorTokens.mutedText,
+              color: SessionColors.textSecondary,
               fontSize: 13,
               height: 1.5,
             ),
@@ -410,7 +401,7 @@ class _Body extends StatelessWidget {
           const SizedBox(height: 10),
           DecoratedBox(
             decoration: BoxDecoration(
-              color: ContinuumColorTokens.bgOverlay,
+              color: SessionColors.warmSurface,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
@@ -420,7 +411,7 @@ class _Body extends StatelessWidget {
                   const Text(
                     '⌸ ',
                     style: TextStyle(
-                      color: ContinuumColorTokens.mono,
+                      color: SessionColors.textMuted,
                       fontSize: 11,
                     ),
                   ),
@@ -429,7 +420,7 @@ class _Body extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'monospace',
                       fontSize: 11,
-                      color: ContinuumColorTokens.mono,
+                      color: SessionColors.textSecondary,
                       letterSpacing: -0.2,
                     ),
                   ),
@@ -491,9 +482,9 @@ class _ActionRow extends StatelessWidget {
               onTap: onReject,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: ContinuumColorTokens.danger.withValues(alpha: 0.12),
+                  color: SessionColors.denyBg,
                   border: Border.all(
-                    color: ContinuumColorTokens.danger.withValues(alpha: 0.4),
+                    color: ContinuumColorTokens.danger.withValues(alpha: 0.3),
                   ),
                   borderRadius: BorderRadius.circular(11),
                 ),
@@ -520,7 +511,7 @@ class _ActionRow extends StatelessWidget {
               onTap: onApprove,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: ContinuumColorTokens.accent,
+                  color: SessionColors.approveBg,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: const SizedBox(
@@ -529,7 +520,7 @@ class _ActionRow extends StatelessWidget {
                     child: Text(
                       'Approve',
                       style: TextStyle(
-                        color: ContinuumColorTokens.accentForeground,
+                        color: ContinuumColorTokens.success,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -558,7 +549,7 @@ class _EmptyState extends StatelessWidget {
           children: [
             DecoratedBox(
               decoration: BoxDecoration(
-                color: ContinuumColorTokens.bgElevated,
+                color: SessionColors.warmSurface,
                 borderRadius: BorderRadius.circular(24),
               ),
               child: const SizedBox(
@@ -568,7 +559,7 @@ class _EmptyState extends StatelessWidget {
                   child: Text(
                     '⛨',
                     style: TextStyle(
-                      color: ContinuumColorTokens.accent,
+                      color: SessionColors.amberText,
                       fontSize: 36,
                     ),
                   ),
@@ -579,7 +570,7 @@ class _EmptyState extends StatelessWidget {
             const Text(
               'No pending approvals',
               style: TextStyle(
-                color: ContinuumColorTokens.textPrimary,
+                color: SessionColors.textDark,
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
               ),
@@ -589,7 +580,7 @@ class _EmptyState extends StatelessWidget {
               'Agent actions that need your review will appear here. Your agents are running smoothly.',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: ContinuumColorTokens.mutedText,
+                color: SessionColors.textSecondary,
                 fontSize: 14,
                 height: 1.55,
               ),
@@ -601,10 +592,10 @@ class _EmptyState extends StatelessWidget {
               child: const Text(
                 'View completed approvals',
                 style: TextStyle(
-                  color: ContinuumColorTokens.mutedText,
+                  color: SessionColors.textMuted,
                   fontSize: 13,
                   decoration: TextDecoration.underline,
-                  decorationColor: ContinuumColorTokens.mutedText,
+                  decorationColor: SessionColors.textMuted,
                 ),
               ),
             ),
@@ -626,7 +617,7 @@ class _MutedCopy extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: ContinuumColorTokens.mutedText,
+          color: SessionColors.textSecondary,
           fontSize: 14,
           height: 1.45,
         ),

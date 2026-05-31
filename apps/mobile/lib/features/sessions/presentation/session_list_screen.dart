@@ -24,9 +24,7 @@ class SessionListScreen extends StatelessWidget {
       builder: (context, snapshot) {
         final sessions = snapshot.data;
         return DecoratedBox(
-          decoration: const BoxDecoration(
-            color: ContinuumColorTokens.bgSurface,
-          ),
+          decoration: const BoxDecoration(color: SessionColors.pageBackground),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: _SessionScreenFrame(
@@ -61,10 +59,10 @@ class _SessionScreenFrame extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              color: ContinuumColorTokens.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.3,
+              color: SessionColors.textDark,
+              fontSize: 34,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0,
             ),
           ),
         ),
@@ -127,9 +125,9 @@ class _SessionItem extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: ContinuumColorTokens.bgElevated,
-          border: Border.all(color: ContinuumColorTokens.border),
-          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.md),
+          color: SessionColors.cardSurface,
+          border: Border.all(color: SessionColors.borderCard),
+          borderRadius: BorderRadius.circular(18),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -146,10 +144,10 @@ class _SessionItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: ContinuumColorTokens.textPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: -0.1,
+                        color: SessionColors.textDark,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0,
                       ),
                     ),
                     const SizedBox(height: 3),
@@ -158,8 +156,8 @@ class _SessionItem extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: ContinuumColorTokens.mutedText,
-                        fontSize: 11,
+                        color: SessionColors.textMuted,
+                        fontSize: 14,
                         fontFamily: 'monospace',
                       ),
                     ),
@@ -220,7 +218,7 @@ class _StatusBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.10),
           border: Border.all(color: color.withValues(alpha: 0.25)),
-          borderRadius: BorderRadius.circular(ContinuumRadiusTokens.pill),
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -303,7 +301,7 @@ class _MutedCopy extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: ContinuumColorTokens.mutedText,
+          color: SessionColors.textMuted,
           fontSize: 14,
           height: 1.45,
         ),

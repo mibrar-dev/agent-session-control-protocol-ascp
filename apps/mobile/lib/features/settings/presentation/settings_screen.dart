@@ -21,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: ContinuumColorTokens.bgSurface),
+      decoration: const BoxDecoration(color: SessionColors.pageBackground),
       child: FutureBuilder<_SettingsViewState>(
         future: _load(),
         builder: (context, snapshot) {
@@ -29,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _TopBar(),
+              const _TopBar(),
               Expanded(
                 child: _SettingsBody(
                   isLoading:
@@ -73,7 +73,7 @@ class _TopBar extends StatelessWidget {
           const Text(
             'Settings and trusted devices',
             style: TextStyle(
-              color: ContinuumColorTokens.textPrimary,
+              color: SessionColors.textDark,
               fontSize: 26,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.5,
@@ -83,7 +83,7 @@ class _TopBar extends StatelessWidget {
           Text(
             'Sessio mobile',
             style: const TextStyle(
-              color: ContinuumColorTokens.mutedText,
+              color: SessionColors.textSecondary,
               fontSize: 13,
             ),
           ),
@@ -131,18 +131,16 @@ class _SettingsBodyState extends State<_SettingsBody> {
       return const Center(child: _MutedCopy('Unable to load settings.'));
     }
     final diagnostics = widget.state?.diagnostics;
-    if (diagnostics == null) {
-      return const SizedBox.shrink();
-    }
+    if (diagnostics == null) return const SizedBox.shrink();
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       children: [
-        _UserSummaryCard(),
+        const _UserSummaryCard(),
         const SizedBox(height: 10),
         Semantics(
           identifier: 'trusted_devices_section',
-          child: _SectionHeader(label: 'Trusted devices'),
+          child: const _SectionHeader(label: 'Trusted devices'),
         ),
         _SettingCard(
           children: [
@@ -153,57 +151,40 @@ class _SettingsBodyState extends State<_SettingsBody> {
                 glyph: '◌',
                 label: 'No trusted devices',
                 value: '',
-                glyphBg: ContinuumColorTokens.bgOverlay,
-                glyphColor: ContinuumColorTokens.mutedText,
               ),
           ],
         ),
         const SizedBox(height: 6),
-        _SectionHeader(label: 'Appearance'),
-        _SettingCard(
+        const _SectionHeader(label: 'Appearance'),
+        const _SettingCard(
           children: [
-            _NavRow(
-              glyph: '◐',
-              label: 'Theme',
-              value: 'System',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-            ),
-            _NavRow(
-              glyph: '▦',
-              label: 'Display density',
-              value: 'Comfortable',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-            ),
+            _NavRow(glyph: '◐', label: 'Theme', value: 'System'),
+            _NavRow(glyph: '▦', label: 'Display density', value: 'Comfortable'),
           ],
         ),
         const SizedBox(height: 6),
-        _SectionHeader(label: 'Notifications'),
+        const _SectionHeader(label: 'Notifications'),
         _SettingCard(
           children: [
             _ToggleRow(
               glyph: '⚑',
               label: 'Approval alerts',
               sublabel: 'Notify when agents need review',
-              glyphBg: ContinuumColorTokens.accent.withValues(alpha: 0.15),
-              glyphColor: ContinuumColorTokens.accent,
+              active: true,
               value: true,
             ),
             _ToggleRow(
               glyph: '◉',
               label: 'Session updates',
               sublabel: 'Progress and completion events',
-              glyphBg: ContinuumColorTokens.success.withValues(alpha: 0.15),
-              glyphColor: ContinuumColorTokens.success,
+              active: true,
               value: true,
             ),
             _ToggleRow(
               glyph: '▤',
               label: 'Completed summaries',
               sublabel: 'Summary after each session ends',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
+              active: false,
               value: false,
             ),
           ],
@@ -211,85 +192,50 @@ class _SettingsBodyState extends State<_SettingsBody> {
         const SizedBox(height: 6),
         Semantics(
           identifier: 'connection_section',
-          child: _SectionHeader(label: 'Connection'),
+          child: const _SectionHeader(label: 'Connection'),
         ),
-        _SettingCard(
+        const _SettingCard(
           children: [
-            _NavRow(
-              glyph: '⏱',
-              label: 'Timeout',
-              value: '30 seconds',
-              glyphBg: ContinuumColorTokens.accent.withValues(alpha: 0.15),
-              glyphColor: ContinuumColorTokens.accent,
-            ),
+            _NavRow(glyph: '⏱', label: 'Timeout', value: '30 seconds'),
             _NavRow(
               glyph: '◎',
               label: 'Relay preference',
               value: 'Local first',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
             ),
             _ToggleRow(
               glyph: '↻',
               label: 'Reconnect automatically',
               sublabel: 'Resume on network restore',
-              glyphBg: ContinuumColorTokens.success.withValues(alpha: 0.15),
-              glyphColor: ContinuumColorTokens.success,
+              active: true,
               value: true,
             ),
           ],
         ),
         const SizedBox(height: 6),
-        _SectionHeader(label: 'Security'),
+        const _SectionHeader(label: 'Security'),
         _SettingCard(
           children: [
             _ToggleRow(
               glyph: '⚿',
               label: 'Require biometric unlock',
               sublabel: 'FaceID before opening Sessio',
-              glyphBg: ContinuumColorTokens.accent.withValues(alpha: 0.15),
-              glyphColor: ContinuumColorTokens.accent,
+              active: true,
               value: true,
             ),
-            _NavRow(
-              glyph: '↑',
-              label: 'Export logs',
-              value: null,
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-            ),
+            const _NavRow(glyph: '↑', label: 'Export logs', value: null),
           ],
         ),
         const SizedBox(height: 6),
-        _SectionHeader(label: 'Diagnostics'),
-        _SettingCard(
+        const _SectionHeader(label: 'Diagnostics'),
+        const _SettingCard(
           children: [
-            _DisplayRow(
-              glyph: '#',
-              label: 'App version',
-              value: '0.1.0',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-            ),
-            _DisplayRow(
-              glyph: '⇋',
-              label: 'Bridge protocol',
-              value: 'ASCP',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-            ),
-            _DisplayRow(
-              glyph: '◷',
-              label: 'Last sync',
-              value: 'Just now',
-              glyphBg: ContinuumColorTokens.bgOverlay,
-              glyphColor: ContinuumColorTokens.mutedText,
-              valueColor: ContinuumColorTokens.success,
-            ),
+            _DisplayRow(glyph: '#', label: 'App version', value: '0.1.0'),
+            _DisplayRow(glyph: '⇋', label: 'Bridge protocol', value: 'ASCP'),
+            _DisplayRow(glyph: '◷', label: 'Last sync', value: 'Just now'),
           ],
         ),
         const SizedBox(height: 6),
-        _DestructiveCard(
+        const _DestructiveCard(
           children: [
             _DestructiveRow(glyph: '⊘', label: 'Revoke all trusted devices'),
             _DestructiveRow(glyph: '⊗', label: 'Clear local session cache'),
@@ -299,7 +245,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
         const Text(
           'These actions are immediate and cannot be undone.',
           textAlign: TextAlign.center,
-          style: TextStyle(color: ContinuumColorTokens.mutedText, fontSize: 11),
+          style: TextStyle(color: SessionColors.textMuted, fontSize: 11),
         ),
         const SizedBox(height: 16),
       ],
@@ -308,9 +254,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
 
   Future<void> _revoke(TrustedDevice device) async {
     final revoked = await widget.controller.revokeDevice(device);
-    if (!mounted || !revoked) {
-      return;
-    }
+    if (!mounted || !revoked) return;
     setState(() {
       _devices = [
         for (final current in _devices)
@@ -327,8 +271,8 @@ class _UserSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
+        color: SessionColors.cardSurface,
+        border: Border.all(color: SessionColors.borderCard),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Padding(
@@ -336,8 +280,8 @@ class _UserSummaryCard extends StatelessWidget {
         child: Row(
           children: [
             DecoratedBox(
-              decoration: const BoxDecoration(
-                color: ContinuumColorTokens.accent,
+              decoration: BoxDecoration(
+                color: SessionColors.amberBg,
                 shape: BoxShape.circle,
               ),
               child: const SizedBox(
@@ -347,7 +291,7 @@ class _UserSummaryCard extends StatelessWidget {
                   child: Text(
                     'MI',
                     style: TextStyle(
-                      color: ContinuumColorTokens.accentForeground,
+                      color: SessionColors.amberText,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -363,7 +307,7 @@ class _UserSummaryCard extends StatelessWidget {
                   const Text(
                     'Muhammad',
                     style: TextStyle(
-                      color: ContinuumColorTokens.textPrimary,
+                      color: SessionColors.textDark,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -372,7 +316,7 @@ class _UserSummaryCard extends StatelessWidget {
                   Text(
                     'MacBook Pro · Local',
                     style: const TextStyle(
-                      color: ContinuumColorTokens.mutedText,
+                      color: SessionColors.textSecondary,
                       fontSize: 12,
                     ),
                   ),
@@ -381,7 +325,7 @@ class _UserSummaryCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: ContinuumColorTokens.success.withValues(alpha: 0.15),
+                color: ContinuumColorTokens.success.withValues(alpha: 0.12),
                 border: Border.all(
                   color: ContinuumColorTokens.success.withValues(alpha: 0.3),
                 ),
@@ -433,7 +377,7 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: const TextStyle(
-          color: ContinuumColorTokens.mutedText,
+          color: SessionColors.textMuted,
           fontSize: 11,
           fontWeight: FontWeight.w500,
           letterSpacing: 0.5,
@@ -452,8 +396,8 @@ class _SettingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
-        border: Border.all(color: ContinuumColorTokens.border),
+        color: SessionColors.cardSurface,
+        border: Border.all(color: SessionColors.borderCard),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -461,7 +405,10 @@ class _SettingCard extends StatelessWidget {
           final index = entry.key;
           final widget = entry.value;
           return Column(
-            children: [widget, if (index < children.length - 1) _CardDivider()],
+            children: [
+              widget,
+              if (index < children.length - 1) const _CardDivider(),
+            ],
           );
         }).toList(),
       ),
@@ -474,13 +421,13 @@ class _CardDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
+    return const DecoratedBox(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: ContinuumColorTokens.border, width: 0.5),
+          bottom: BorderSide(color: SessionColors.borderLight, width: 0.5),
         ),
       ),
-      child: const SizedBox(height: 1),
+      child: SizedBox(height: 1, width: double.infinity),
     );
   }
 }
@@ -499,7 +446,7 @@ class _DeviceRow extends StatelessWidget {
         children: [
           DecoratedBox(
             decoration: BoxDecoration(
-              color: ContinuumColorTokens.accent.withValues(alpha: 0.15),
+              color: SessionColors.amberBg,
               borderRadius: BorderRadius.circular(8),
             ),
             child: const SizedBox(
@@ -509,7 +456,7 @@ class _DeviceRow extends StatelessWidget {
                 child: Text(
                   '⌘',
                   style: TextStyle(
-                    color: ContinuumColorTokens.accent,
+                    color: SessionColors.amberText,
                     fontSize: 14,
                   ),
                 ),
@@ -524,7 +471,7 @@ class _DeviceRow extends StatelessWidget {
                 Text(
                   device.displayName,
                   style: const TextStyle(
-                    color: ContinuumColorTokens.textPrimary,
+                    color: SessionColors.textDark,
                     fontSize: 14,
                   ),
                 ),
@@ -544,7 +491,7 @@ class _DeviceRow extends StatelessWidget {
             onTap: onRevoke,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: ContinuumColorTokens.danger.withValues(alpha: 0.12),
+                color: SessionColors.denyBg,
                 border: Border.all(
                   color: ContinuumColorTokens.danger.withValues(alpha: 0.3),
                 ),
@@ -574,15 +521,11 @@ class _NavRow extends StatelessWidget {
     required this.glyph,
     required this.label,
     required this.value,
-    required this.glyphBg,
-    required this.glyphColor,
   });
 
   final String glyph;
   final String label;
   final String? value;
-  final Color glyphBg;
-  final Color glyphColor;
 
   @override
   Widget build(BuildContext context) {
@@ -595,7 +538,7 @@ class _NavRow extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: glyphBg,
+                  color: SessionColors.warmSurface,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SizedBox(
@@ -604,7 +547,10 @@ class _NavRow extends StatelessWidget {
                   child: Center(
                     child: Text(
                       glyph,
-                      style: TextStyle(color: glyphColor, fontSize: 13),
+                      style: const TextStyle(
+                        color: SessionColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -613,7 +559,7 @@ class _NavRow extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
+                  color: SessionColors.textDark,
                   fontSize: 14,
                 ),
               ),
@@ -625,7 +571,7 @@ class _NavRow extends StatelessWidget {
                 Text(
                   value!,
                   style: const TextStyle(
-                    color: ContinuumColorTokens.mutedText,
+                    color: SessionColors.textMuted,
                     fontSize: 13,
                   ),
                 ),
@@ -634,7 +580,7 @@ class _NavRow extends StatelessWidget {
               const Text(
                 '›',
                 style: TextStyle(
-                  color: ContinuumColorTokens.border,
+                  color: SessionColors.borderLight,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -652,16 +598,14 @@ class _ToggleRow extends StatelessWidget {
     required this.glyph,
     required this.label,
     required this.sublabel,
-    required this.glyphBg,
-    required this.glyphColor,
+    required this.active,
     required this.value,
   });
 
   final String glyph;
   final String label;
   final String sublabel;
-  final Color glyphBg;
-  final Color glyphColor;
+  final bool active;
   final bool value;
 
   @override
@@ -671,46 +615,57 @@ class _ToggleRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: glyphBg,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: Center(
-                    child: Text(
-                      glyph,
-                      style: TextStyle(color: glyphColor, fontSize: 13),
+          Expanded(
+            child: Row(
+              children: [
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: active
+                        ? SessionColors.amberBg
+                        : SessionColors.warmSurface,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: Center(
+                      child: Text(
+                        glyph,
+                        style: TextStyle(
+                          color: active
+                              ? SessionColors.amberText
+                              : SessionColors.textMuted,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.textPrimary,
-                      fontSize: 14,
-                    ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: const TextStyle(
+                          color: SessionColors.textDark,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        sublabel,
+                        style: const TextStyle(
+                          color: SessionColors.textMuted,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    sublabel,
-                    style: const TextStyle(
-                      color: ContinuumColorTokens.mutedText,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
           _Toggle(value: value),
         ],
@@ -728,9 +683,7 @@ class _Toggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: value
-            ? ContinuumColorTokens.accent
-            : ContinuumColorTokens.border,
+        color: value ? SessionColors.amberText : SessionColors.borderLight,
         borderRadius: BorderRadius.circular(999),
       ),
       child: SizedBox(
@@ -741,10 +694,8 @@ class _Toggle extends StatelessWidget {
           child: Align(
             alignment: value ? Alignment.centerRight : Alignment.centerLeft,
             child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: value
-                    ? ContinuumColorTokens.accentForeground
-                    : ContinuumColorTokens.mutedText,
+              decoration: const BoxDecoration(
+                color: SessionColors.cardSurface,
                 shape: BoxShape.circle,
               ),
               child: const SizedBox(width: 20, height: 20),
@@ -761,17 +712,11 @@ class _DisplayRow extends StatelessWidget {
     required this.glyph,
     required this.label,
     required this.value,
-    required this.glyphBg,
-    required this.glyphColor,
-    this.valueColor,
   });
 
   final String glyph;
   final String label;
   final String value;
-  final Color glyphBg;
-  final Color glyphColor;
-  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -784,7 +729,7 @@ class _DisplayRow extends StatelessWidget {
             children: [
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: glyphBg,
+                  color: SessionColors.warmSurface,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: SizedBox(
@@ -793,7 +738,10 @@ class _DisplayRow extends StatelessWidget {
                   child: Center(
                     child: Text(
                       glyph,
-                      style: TextStyle(color: glyphColor, fontSize: 13),
+                      style: const TextStyle(
+                        color: SessionColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 ),
@@ -802,7 +750,7 @@ class _DisplayRow extends StatelessWidget {
               Text(
                 label,
                 style: const TextStyle(
-                  color: ContinuumColorTokens.textPrimary,
+                  color: SessionColors.textDark,
                   fontSize: 14,
                 ),
               ),
@@ -810,8 +758,8 @@ class _DisplayRow extends StatelessWidget {
           ),
           Text(
             value,
-            style: TextStyle(
-              color: valueColor ?? ContinuumColorTokens.mutedText,
+            style: const TextStyle(
+              color: SessionColors.textMuted,
               fontSize: 12,
             ),
           ),
@@ -830,7 +778,7 @@ class _DestructiveCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: ContinuumColorTokens.bgElevated,
+        color: SessionColors.cardSurface,
         border: Border.all(
           color: ContinuumColorTokens.danger.withValues(alpha: 0.25),
         ),
@@ -855,7 +803,7 @@ class _DestructiveCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  child: const SizedBox(height: 1),
+                  child: const SizedBox(height: 1, width: double.infinity),
                 ),
             ],
           );
@@ -912,7 +860,7 @@ class _MutedCopy extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-          color: ContinuumColorTokens.mutedText,
+          color: SessionColors.textSecondary,
           fontSize: 14,
           height: 1.45,
         ),

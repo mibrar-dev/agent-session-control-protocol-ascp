@@ -54,14 +54,13 @@ void main() {
   ) async {
     await tester.pumpWidget(const ContinuumMobileApp());
 
-    expect(find.text('Continuum'), findsOneWidget);
-    expect(find.text('Pair New Device'), findsOneWidget);
+    expect(find.text('Pair a host'), findsOneWidget);
     expect(find.text('Scan QR code'), findsOneWidget);
 
     await tester.tap(find.text('Enter code manually'));
     await tester.pump();
 
-    expect(find.text('Verify'), findsOneWidget);
+    expect(find.text('Claim device'), findsOneWidget);
   });
 
   testWidgets('trusted shell can move from sessions to approvals', (
@@ -169,12 +168,12 @@ void main() {
     await tester.tap(find.text('Enter code manually'));
     await tester.pump();
     await tester.enterText(find.byType(EditableText), '127.0.0.1:8765:APPROVE');
-    await tester.tap(find.text('Verify'));
+    await tester.tap(find.text('Claim device'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Continue'));
     await tester.pump();
 
-    expect(find.text('ASCP Protocol Controller'), findsOneWidget);
+    expect(find.text('MacBook Pro · Local'), findsOneWidget);
     expect(find.text('Sessions'), findsWidgets);
   });
 
@@ -200,7 +199,7 @@ void main() {
     await tester.pumpWidget(ContinuumMobileApp(dependencies: dependencies));
     await tester.pumpAndSettle();
 
-    expect(find.text('ASCP Protocol Controller'), findsOneWidget);
-    expect(find.text('Connected'), findsOneWidget);
+    expect(find.text('MacBook Pro · Local'), findsOneWidget);
+    expect(find.text('Connected via local relay'), findsOneWidget);
   });
 }
