@@ -42,17 +42,11 @@ class DaemonSettingsRepository implements SettingsRepository {
     required Dio dio,
     required this.adminBaseUrl,
     this.currentDeviceId,
-    this.diagnostics = const TransportDiagnostics(
-      hostId: 'daemon',
-      state: 'connected',
-      replayEnabled: true,
-    ),
   }) : _dio = dio;
 
   final Dio _dio;
   final Uri adminBaseUrl;
   final String? currentDeviceId;
-  final TransportDiagnostics diagnostics;
 
   @override
   Future<List<TrustedDevice>> listTrustedDevices() async {
@@ -74,7 +68,26 @@ class DaemonSettingsRepository implements SettingsRepository {
   }
 
   @override
-  Future<TransportDiagnostics> readDiagnostics() async => diagnostics;
+  Future<TransportDiagnostics> readDiagnostics() async {
+    try {
+      final response = await _dio.getUri<Object?>(
+        adminBaseUrl.resolve('/admin/diagnostics'),
+      );
+      final body = _asMap(response.data, 'diagnostics');
+      return TransportDiagnostics(
+        hostId: (body['host_id'] as String?) ?? 'unknown',
+        state: (body['state'] as String?) ?? 'unknown',
+        replayEnabled: body['replay_enabled'] == true,
+        lastError: body['last_error'] as String?,
+      );
+    } on DioException {
+      return const TransportDiagnostics(
+        hostId: 'unknown',
+        state: 'unreachable',
+        replayEnabled: false,
+      );
+    }
+  }
 
   @override
   Future<void> revokeTrustedDevice(String deviceId) async {

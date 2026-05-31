@@ -1,0 +1,177 @@
+{
+  "AXFrame": "{{0, 0}, {402, 874}}",
+  "AXUniqueId": null,
+  "frame": {
+    "y": 0,
+    "x": 0,
+    "width": 402,
+    "height": 874
+  },
+  "role_description": "application",
+  "AXLabel": "Continuum",
+  "content_required": false,
+  "type": "Application",
+  "title": null,
+  "help": null,
+  "custom_actions": [],
+  "AXValue": null,
+  "enabled": true,
+  "role": "AXApplication",
+  "children": [
+    {
+      "AXFrame": "{{126.71236165364583, 70}, {158.57527669270837, 41}}",
+      "AXUniqueId": null,
+      "frame": {
+        "y": 70,
+        "x": 126.71236165364583,
+        "width": 158.57527669270837,
+        "height": 41
+      },
+      "role_description": "text",
+      "AXLabel": "Sessions",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{126.71236165364583, 133}, {123.16308593749999, 623}}",
+      "AXUniqueId": null,
+      "frame": {
+        "y": 133,
+        "x": 126.71236165364583,
+        "width": 123.16308593749999,
+        "height": 623
+      },
+      "role_description": "text",
+      "AXLabel": "No active sessions",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{10, 772}, {76.400004069010421, 58}}",
+      "AXUniqueId": "nav_home",
+      "frame": {
+        "y": 772,
+        "x": 10,
+        "width": 76.40000406901042,
+        "height": 58
+      },
+      "role_description": "text",
+      "AXLabel": "\u2302\nHome",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{86.400004069010421, 772}, {76.400004069010421, 58}}",
+      "AXUniqueId": "nav_sessions",
+      "frame": {
+        "y": 772,
+        "x": 86.40000406901042,
+        "width": 76.40000406901042,
+        "height": 58
+      },
+      "role_description": "text",
+      "AXLabel": "\u2637\nSessions",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{162.80000813802084, 772}, {76.400004069010407, 58}}",
+      "AXUniqueId": "nav_approvals",
+      "frame": {
+        "y": 772,
+        "x": 162.80000813802084,
+        "width": 76.40000406901041,
+        "height": 58
+      },
+      "role_description": "text",
+      "AXLabel": "\u2713\nApprovals",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{239.19999186197916, 772}, {76.400004069010407, 58}}",
+      "AXUniqueId": "nav_devices",
+      "frame": {
+        "y": 772,
+        "x": 239.19999186197916,
+        "width": 76.40000406901041,
+        "height": 58
+      },
+      "role_description": "text",
+      "AXLabel": "\u25b0\nDevices",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    },
+    {
+      "AXFrame": "{{315.60001627604169, 772}, {76.399983723958314, 58}}",
+      "AXUniqueId": "nav_settings",
+      "frame": {
+        "y": 772,
+        "x": 315.6000162760417,
+        "width": 76.39998372395831,
+        "height": 58
+      },
+      "role_description": "text",
+      "AXLabel": "\u2699\nSettings",
+      "content_required": false,
+      "type": "StaticText",
+      "title": null,
+      "help": null,
+      "custom_actions": [],
+      "AXValue": null,
+      "enabled": true,
+      "role": "AXStaticText",
+      "children": [],
+      "subrole": null
+    }
+  ],
+  "subrole": null
+}

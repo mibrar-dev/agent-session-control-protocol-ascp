@@ -1,0 +1,128 @@
+<!doctype html><html><head><meta charset='utf-8'><title>AgentForge Real-Data QA Report</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:48px;color:#211a14;background:#fbf7ef;line-height:1.45}h1{font-size:34px;margin-bottom:8px}h2{margin-top:34px;border-bottom:1px solid #d8cec1;padding-bottom:8px}h3{margin-top:24px}table{width:100%;border-collapse:collapse;margin:14px 0;background:#fff;border:1px solid #ded5ca;border-radius:10px;overflow:hidden}th,td{border-bottom:1px solid #eee7df;padding:10px 12px;text-align:left;vertical-align:top}th{background:#f2ebe2;color:#5a4a3d}code{background:#eee6dc;padding:2px 5px;border-radius:5px}ul{padding-left:24px}.meta{color:#7b6f63}</style></head><body><h1>AgentForge Real-Data QA Report — 2026-05-31</h1>
+
+<h2>Executive Summary</h2>
+
+<p>Codex acted as orchestrator and reviewer. Implementation and simulator QA were routed through AgentForge subagents:</p>
+
+<ul>
+<li>Kiro implemented the stale-data fixes and daemon diagnostics endpoint.</li>
+<li>Gemini produced a live-mode simulator QA report using localhost daemon endpoints.</li>
+<li>OpenCode attempted iOS simulator QA with the iOS simulator skill but stalled after a simulator release-build constraint.</li>
+<li>Kiro reran simulator QA with the iOS simulator skill, captured screenshots, and wrote the final simulator evidence report.</li>
+</ul>
+
+<p>Result: <strong>pass with caveats</strong>.</p>
+
+<p>All reachable app screens render, navigate, and no longer show the stale demo values called out in the request. Subagent evidence covers both live pairing with localhost daemon endpoints and deterministic memory-mode pairing. The live ASCP chat/session path was <strong>not fully verified in simulator</strong> because no active session was available to open during the simulator passes.</p>
+
+<h2>Code Fixes Reviewed</h2>
+
+<table>
+<tr><th>Area</th><th>Result</th></tr>
+<tr><td>Settings summary card</td><td>Removed hardcoded <code>Muhammad</code> and <code>MacBook Pro · Local</code>; summary now reads <code>TransportDiagnostics</code>.</td></tr>
+<tr><td>Devices screen</td><td>Removed hardcoded fallback <code>MacBook Pro · Local</code>, <code>Ubuntu Workstation</code>, fake paired dates, and fake <code>18 ms</code>; empty device state now renders when the repository has no trusted devices.</td></tr>
+<tr><td>Settings diagnostics</td><td>Replaced hardcoded <code>0.1.0</code> and <code>Just now</code> with build-defined app version and diagnostics-derived sync state.</td></tr>
+<tr><td>Daemon diagnostics</td><td>Added <code>GET /admin/diagnostics</code>; diagnostics now report the server host and listening state.</td></tr>
+<tr><td>Tests</td><td>Added/updated widget and repository tests for live diagnostics, unreachable daemon fallback, empty devices, and stale-demo absence.</td></tr>
+</table>
+
+<h2>Verification Matrix</h2>
+
+<table>
+<tr><th>Check</th><th>Executor</th><th>Result</th></tr>
+<tr><td><code>flutter analyze</code></td><td>Codex verifier</td><td>Passed, no issues.</td></tr>
+<tr><td><code>flutter test</code></td><td>Codex verifier</td><td>Passed, 162 tests.</td></tr>
+<tr><td><code>npm --workspace @ascp/host-daemon run test</code></td><td>Codex verifier</td><td>Passed, 39 tests.</td></tr>
+<tr><td><code>npm --workspace @ascp/host-daemon run build</code></td><td>Codex verifier</td><td>Passed, regenerated daemon <code>dist</code>.</td></tr>
+<tr><td><code>flutter_shadcn validate --json</code></td><td>Codex verifier</td><td>Passed, 133 components checked.</td></tr>
+<tr><td><code>flutter_shadcn audit</code></td><td>Codex verifier</td><td>Passed, registry coverage and files OK.</td></tr>
+<tr><td><code>flutter_shadcn deps</code></td><td>Codex verifier</td><td>Passed, required shadcn dependencies present.</td></tr>
+<tr><td>iOS simulator health check</td><td>Kiro subagent using iOS simulator skill</td><td>Passed, 8/8 checks.</td></tr>
+<tr><td>Live daemon pairing</td><td>Gemini subagent</td><td>Passed using <code>localhost:9875</code>/<code>localhost:9876</code>; report recorded pairing code <code>587450</code>.</td></tr>
+<tr><td>iOS app launch</td><td>Kiro subagent</td><td>Passed on iPhone 16 Pro simulator.</td></tr>
+<tr><td>Pairing flow</td><td>Kiro subagent</td><td>Passed in memory mode with deterministic code <code>111111</code>; Continue entered trusted shell.</td></tr>
+<tr><td>Home tab</td><td>Kiro subagent</td><td>Passed.</td></tr>
+<tr><td>Sessions tab</td><td>Kiro subagent</td><td>Passed empty-state screen.</td></tr>
+<tr><td>Approvals tab</td><td>Kiro subagent</td><td>Passed empty-state screen.</td></tr>
+<tr><td>Devices tab</td><td>Kiro subagent</td><td>Passed empty-state screen with no demo devices.</td></tr>
+<tr><td>Settings tab</td><td>Kiro subagent</td><td>Passed, shows diagnostics-derived values.</td></tr>
+<tr><td>Active session/chat</td><td>Kiro subagent</td><td>Blocked: memory mode had zero sessions and live ASCP RPC was unavailable.</td></tr>
+<tr><td>Stale-data audit</td><td>Kiro subagent + Codex grep</td><td>Passed for visible UI and source checks.</td></tr>
+</table>
+
+<h2>Stale-Data Audit</h2>
+
+<p>These values were not visible in the simulator screens and are absent from production Flutter code:</p>
+
+<ul>
+<li><code>Muhammad</code></li>
+<li><code>MacBook Pro · Local</code></li>
+<li><code>Ubuntu Workstation</code></li>
+<li><code>18 ms</code></li>
+<li><code>Paired Apr</code></li>
+<li><code>Last heartbeat 4s ago</code></li>
+<li><code>0.1.0</code></li>
+<li><code>Just now</code></li>
+</ul>
+
+<p>The only remaining matches are intentional negative test assertions or report text documenting that the values were removed.</p>
+
+<h2>Simulator Evidence</h2>
+
+<p>Subagent report:</p>
+
+<ul>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/2026-05-31-gemini-ios-simulator-live-qa.md</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/2026-05-31-kiro-ios-simulator-skill-qa.md</code></li>
+</ul>
+
+<p>Screenshots:</p>
+
+<ul>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/01-initial-screen.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/02-pairing-approved.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/03-home-dashboard.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/04-sessions.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/05-approvals.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/06-devices.png</code></li>
+<li><code>/Users/ibrar/Desktop/infinora.noworkspace/Continuum App/agent-session-control-protocol-ascp/apps/mobile/qa-reports/screenshots/07-settings.png</code></li>
+</ul>
+
+<h2>Accessibility Findings</h2>
+
+<p>The simulator accessibility audit found no critical issues, but it reported missing accessibility traits:</p>
+
+<ul>
+<li>Pairing: 20 warnings.</li>
+<li>Home: 14 warnings.</li>
+<li>Settings: 22 warnings.</li>
+</ul>
+
+<p>Primary issue: Flutter elements are exposed as static text unless interactive controls receive explicit <code>Semantics</code> roles. Recommended follow-up: add <code>Semantics(button: true)</code>, labels, and hints to bottom navigation, action cards, pairing OTP cells, and command buttons.</p>
+
+<h2>Live Backend Caveat</h2>
+
+<p>Live-mode pairing evidence exists from the Gemini subagent using <code>localhost</code> endpoints:</p>
+
+<ul>
+<li><code>CONTINUUM_ASCP_RPC_ENDPOINT=http://localhost:9875/rpc</code></li>
+<li><code>CONTINUUM_ASCP_WS_ENDPOINT=ws://localhost:9875/rpc</code></li>
+<li><code>CONTINUUM_DAEMON_ADMIN_BASE_URL=http://localhost:9876</code></li>
+</ul>
+
+<p>Kiro's later endpoint probe saw daemon admin endpoints on <code>8767</code> and <code>9876</code>, while the previous <code>18787</code> RPC endpoint was unavailable:</p>
+
+<ul>
+<li><code>http://127.0.0.1:18787/rpc</code>: unreachable.</li>
+<li><code>http://127.0.0.1:9876/admin/pairing/sessions</code>: reachable.</li>
+<li><code>http://127.0.0.1:8767/admin/pairing/sessions</code>: reachable.</li>
+</ul>
+
+<p>The live pairing surface is covered, but live chat/session detail remains blocked until the daemon has at least one active session available for the app to open and stream.</p>
+
+<h2>Final Verdict</h2>
+
+<p><strong>Pass with caveats.</strong></p>
+
+<p>The stale-data cleanup is complete for the reachable app UI and production Flutter code. Settings/devices now read repository and diagnostics state instead of stale demo values. Simulator QA verified live pairing, memory-mode fallback pairing, and all reachable tabs with screenshots. The remaining gap is a true live ASCP chat/session verification pass, which requires seeded or real active sessions.</p>
+</body></html>

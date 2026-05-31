@@ -22,8 +22,7 @@ class DevicesScreen extends StatelessWidget {
     return FutureBuilder<List<TrustedDevice>>(
       future: controller.listTrustedDevices(),
       builder: (context, snapshot) {
-        final loaded = snapshot.data ?? const <TrustedDevice>[];
-        final devices = loaded.isEmpty ? _fallbackDevices : loaded;
+        final devices = snapshot.data ?? const <TrustedDevice>[];
         return ColoredBox(
           color: SessionColors.pageBackground,
           child: ListView(
@@ -61,15 +60,18 @@ class DevicesScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 28),
-              for (final entry in devices.indexed) ...[
-                _DeviceCard(
-                  device: entry.$2,
-                  isOnline: entry.$1 == 0,
-                  platform: entry.$1 == 0 ? 'Mac' : 'Linux',
-                  trustLabel: entry.$1 == 0 ? 'Trusted' : 'Limited',
-                ),
-                const SizedBox(height: 16),
-              ],
+              if (devices.isEmpty)
+                const _EmptyState()
+              else
+                for (final entry in devices.indexed) ...[
+                  _DeviceCard(
+                    device: entry.$2,
+                    isOnline: entry.$2.isCurrentDevice,
+                    platform: 'Device',
+                    trustLabel: 'Trusted',
+                  ),
+                  const SizedBox(height: 16),
+                ],
               const _TrustNote(),
             ],
           ),
@@ -127,16 +129,7 @@ class _DeviceCard extends StatelessWidget {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         spacing: 8,
                         runSpacing: 4,
-                        children: [
-                          _PlatformPill(label: platform),
-                          const Text(
-                            '· Paired Apr 28, 2026',
-                            style: TextStyle(
-                              color: SessionColors.textMuted,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
+                        children: [_PlatformPill(label: platform)],
                       ),
                     ],
                   ),
@@ -162,7 +155,7 @@ class _DeviceCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    isOnline ? '● Online · 18 ms' : '● Offline',
+                    isOnline ? '● Online' : '● Offline',
                     style: TextStyle(
                       color: isOnline
                           ? const Color(0xFF47785C)
@@ -189,22 +182,19 @@ class _DeviceGlyph extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMac = platform == 'Mac';
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: isMac ? const Color(0xFFEAF0FF) : const Color(0xFFEDE8DE),
+        color: const Color(0xFFEDE8DE),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: SizedBox(
+      child: const SizedBox(
         width: 66,
         height: 66,
         child: Center(
           child: Text(
-            isMac ? '▱' : '›_',
+            '⌘',
             style: TextStyle(
-              color: isMac
-                  ? const Color(0xFF315996)
-                  : SessionColors.textSecondary,
+              color: SessionColors.textSecondary,
               fontSize: 31,
               fontWeight: FontWeight.w700,
             ),
@@ -301,6 +291,23 @@ class _TrustPill extends StatelessWidget {
   }
 }
 
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 32),
+      child: Center(
+        child: Text(
+          'No trusted devices paired',
+          style: TextStyle(color: SessionColors.textMuted, fontSize: 17),
+        ),
+      ),
+    );
+  }
+}
+
 class _TrustNote extends StatelessWidget {
   const _TrustNote();
 
@@ -356,15 +363,3 @@ class _TrustNote extends StatelessWidget {
     );
   }
 }
-
-const _fallbackDevices = [
-  TrustedDevice.current(
-    id: 'macbook-local',
-    displayName: 'MacBook Pro · Local',
-  ),
-  TrustedDevice(
-    id: 'ubuntu-workstation',
-    displayName: 'Ubuntu Workstation',
-    isCurrentDevice: false,
-  ),
-];

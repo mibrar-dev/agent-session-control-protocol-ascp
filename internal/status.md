@@ -14,6 +14,14 @@ Use this file as a session-to-session checkpoint log. Each completed task should
 
 ## Entries
 
+### 2026-05-31 - Mobile real-data cleanup and subagent simulator QA
+
+- Branch: `codex/mobile-live-real-data-qa`
+- Commit: this commit
+- Summary: used AgentForge with Codex as orchestrator/reviewer. Kiro removed stale settings/devices demo data from the Flutter UI, added daemon-backed diagnostics reads, exposed a daemon `/admin/diagnostics` endpoint, and added focused widget/repository/daemon tests. Gemini produced live-mode iOS simulator evidence using localhost daemon endpoints and confirmed pairing/navigation with no stale data. OpenCode attempted iOS simulator QA with the iOS simulator skill but stalled after a simulator release-build issue; Kiro reran simulator QA with the skill, rebuilt the app in debug simulator mode, completed deterministic pairing, verified Home/Sessions/Approvals/Devices/Settings, captured seven screenshots, and confirmed stale values were absent. Codex verified `flutter analyze`, `flutter test`, host-daemon tests/build, shadcn validation/audit/deps, stale-data searches, and generated consolidated markdown/HTML/PDF QA reports.
+- Documentation updated: `internal/plans.md`, `internal/status.md`, `apps/mobile/qa-reports/2026-05-31-agentforge-real-data-qa-report.md`, `apps/mobile/qa-reports/2026-05-31-agentforge-real-data-qa-report.html`, `apps/mobile/qa-reports/2026-05-31-agentforge-real-data-qa-report.pdf`, `apps/mobile/qa-reports/2026-05-31-kiro-ios-simulator-skill-qa.md`
+- Next likely step: start the daemon with a stable app-matching ASCP RPC/admin configuration and seed or create at least one active session so simulator QA can verify the live chat/session path end to end.
+
 ### 2026-05-31 - Live UI QA fixes and integration test hardening
 
 - Branch: `codex/mobile-live-session-detail`

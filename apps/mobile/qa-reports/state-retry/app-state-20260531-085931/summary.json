@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-05-31T08:59:31.828791",
+  "screenshot_mode": "file",
+  "output_dir": "qa-reports/state-retry/app-state-20260531-085931",
+  "screenshot": {
+    "mode": "file",
+    "file": "screenshot.png",
+    "size_bytes": 200347
+  },
+  "accessibility": {
+    "captured": true,
+    "element_count": 22
+  },
+  "device": {
+    "name": "iPhone 16 Pro",
+    "udid": "51992D3D-F500-43CB-A594-6B85AF7B1E21",
+    "state": "Booted"
+  }
+}

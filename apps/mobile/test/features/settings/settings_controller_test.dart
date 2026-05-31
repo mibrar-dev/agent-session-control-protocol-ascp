@@ -117,6 +117,43 @@ void main() {
     expect(adapter.method, 'POST');
     expect(adapter.path, '/admin/trusted-devices/device_2/revoke');
   });
+
+  test(
+    'daemon settings repository reads live diagnostics from endpoint',
+    () async {
+      final dio = Dio()
+        ..httpClientAdapter = const _FakeAdapter(
+          '{"host_id":"host_abc","state":"connected","replay_enabled":true}',
+        );
+      final repository = DaemonSettingsRepository(
+        dio: dio,
+        adminBaseUrl: Uri.parse('http://127.0.0.1:4890'),
+      );
+
+      final diagnostics = await repository.readDiagnostics();
+
+      expect(diagnostics.hostId, 'host_abc');
+      expect(diagnostics.state, 'connected');
+      expect(diagnostics.replayEnabled, isTrue);
+      expect(diagnostics.isDegraded, isFalse);
+    },
+  );
+
+  test(
+    'daemon settings repository returns unreachable on network error',
+    () async {
+      final dio = Dio()..httpClientAdapter = const _ErrorAdapter();
+      final repository = DaemonSettingsRepository(
+        dio: dio,
+        adminBaseUrl: Uri.parse('http://127.0.0.1:4890'),
+      );
+
+      final diagnostics = await repository.readDiagnostics();
+
+      expect(diagnostics.state, 'unreachable');
+      expect(diagnostics.isDegraded, isTrue);
+    },
+  );
 }
 
 class _FakeAdapter implements HttpClientAdapter {
@@ -158,5 +195,24 @@ class _RecordingAdapter extends _FakeAdapter {
     method = options.method;
     path = options.uri.path;
     return super.fetch(options, requestStream, cancelFuture);
+  }
+}
+
+class _ErrorAdapter implements HttpClientAdapter {
+  const _ErrorAdapter();
+
+  @override
+  void close({bool force = false}) {}
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      type: DioExceptionType.connectionError,
+    );
   }
 }

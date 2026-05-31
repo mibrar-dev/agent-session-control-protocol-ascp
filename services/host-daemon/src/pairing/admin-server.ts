@@ -193,6 +193,15 @@ class LoopbackPairingAdminServer implements PairingAdminServer {
         return;
       }
 
+      if (request.method === "GET" && pathname === "/admin/diagnostics") {
+        sendJson(response, 200, {
+          host_id: this.host,
+          replay_enabled: true,
+          state: this.listening ? "connected" : "disconnected"
+        });
+        return;
+      }
+
       const revokeMatch = pathname.match(/^\/admin\/trusted-devices\/([^/]+)\/revoke$/);
       if (request.method === "POST" && revokeMatch !== null) {
         const deviceId = decodeURIComponent(revokeMatch[1] ?? "");

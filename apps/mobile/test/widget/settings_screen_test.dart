@@ -36,7 +36,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('This phone'), findsOneWidget);
-    expect(find.text('connected'), findsOneWidget);
+    expect(find.text('connected'), findsWidgets);
   });
 
   testWidgets('settings screen delegates revoke action', (tester) async {
@@ -66,5 +66,55 @@ void main() {
     await tester.pump();
 
     expect(repository.revokedDeviceIds, ['device_2']);
+  });
+
+  testWidgets('settings screen does not render hardcoded Muhammad', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: SettingsScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('Muhammad'), findsNothing);
+  });
+
+  testWidgets('settings screen does not render hardcoded MacBook Pro · Local', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: SettingsScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('MacBook Pro · Local'), findsNothing);
+  });
+
+  testWidgets('settings screen shows host id from diagnostics', (tester) async {
+    await tester.pumpWidget(
+      Directionality(textDirection: TextDirection.ltr, child: SettingsScreen()),
+    );
+    await tester.pump();
+
+    expect(find.text('Host: host_1'), findsOneWidget);
+  });
+
+  testWidgets('settings screen shows empty device state when no devices', (
+    tester,
+  ) async {
+    final controller = SettingsController(
+      repository: MemorySettingsRepository(devices: const []),
+      localAuth: const AllowingLocalAuthGate(),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: SettingsScreen(controller: controller),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('No trusted devices'), findsOneWidget);
   });
 }

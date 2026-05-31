@@ -13,7 +13,7 @@ This file tracks the active scoped work for the current branch.
 ## Active State
 
 - Feature name: Mobile companion Flutter architecture and build plan
-- Branch: `codex/mobile-live-session-detail`
+- Branch: `codex/mobile-live-real-data-qa`
 - Goal: build the Flutter-first mobile companion app foundation with feature-first folders, shadcn UI primitives, exact ASCP core models, JSON-RPC transports, pairing/trust foundations, app shell, feature domain slices, and replay cursor persistence
 - Source inputs:
   - `AGENTS.md`
@@ -100,6 +100,7 @@ Files expected to be added or modified in this slice:
 | completed | compact pairing and chat screen parity | OpenCode/Qwen was used through Agent Forge for implementation guidance while Codex reviewed and merged; pairing is now a single-screen layout using Flutter shadcn `InputOTP`, manual pairing accepts six-digit code-only entry against the configured host, active session detail is restyled as a warm chat surface, QA HTML/PDF evidence was generated, and tests/shadcn/simulator checks pass |
 | completed | run Agent Forge live QA and align pairing/chat live data | XcodeBuildMCP was exposed to OpenCode/Kiro/Claude/Blackbox config surfaces, iOS skills were copied into global agent skill folders, OpenCode audited live readiness, timeline rendering now preserves structured ASCP event payloads, the home dashboard no longer leaks demo session/host/health values into live mode, daemon pairing codes are six-digit numeric OTPs, and QA HTML/PDF evidence was generated |
 | completed | run subagent live QA with iOS debugger access | Agent Forge routed live QA through OpenCode/Qwen and Kiro while Codex reviewed; OpenCode used its configured XcodeBuildMCP connection to run the daemon, generate a numeric pairing code, build/install/launch the live iOS simulator app, and capture screenshot evidence before stalling during report generation; Kiro produced a live-readiness audit; Blackbox failed to produce its requested report after two attempts; Codex consolidated the evidence into markdown/HTML/PDF QA reports |
+| completed | remove stale settings/device demo data and run subagent simulator QA | AgentForge routed the stale-data implementation to Kiro and simulator QA to OpenCode/Kiro while Codex reviewed; settings/devices now render repository and diagnostics data instead of demo values, daemon diagnostics has a live endpoint, Flutter/daemon tests pass, iOS simulator QA captured seven screenshots, and a consolidated markdown/HTML/PDF QA report documents the remaining live RPC/chat blocker |
 
 ## Acceptance Criteria
 
@@ -114,4 +115,4 @@ This slice is done only when all of the following are true:
 
 ## Next Likely Step
 
-Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest pass verified Agent Forge subagent live QA, OpenCode-driven daemon/build/simulator execution with XcodeBuildMCP, Kiro static live-readiness audit, Flutter/shadcn/backend tests, and a simulator screenshot of the live pairing screen. The next likely work is defining a protocol-backed model-switching contract, replacing hardcoded settings diagnostics and device fallback data, and adding tap/type-capable live simulator automation for full OTP claim and host approval.
+Mobile Flutter foundation is ready for the next backend-connected interaction slice. The latest pass removed stale settings/devices demo data, added daemon diagnostics, verified Flutter and daemon tests, and produced subagent simulator QA evidence. The next likely work is starting the daemon with a stable app-matching ASCP RPC/admin configuration, seeding or creating at least one active session, and rerunning simulator QA against the live chat/session path.

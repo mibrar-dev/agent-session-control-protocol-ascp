@@ -111,6 +111,11 @@ class _SettingsBody extends StatefulWidget {
 }
 
 class _SettingsBodyState extends State<_SettingsBody> {
+  static const _appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: 'development',
+  );
+
   List<TrustedDevice> _devices = const [];
 
   @override
@@ -136,7 +141,7 @@ class _SettingsBodyState extends State<_SettingsBody> {
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       children: [
-        const _UserSummaryCard(),
+        _UserSummaryCard(diagnostics: diagnostics),
         const SizedBox(height: 10),
         Semantics(
           identifier: 'trusted_devices_section',
@@ -227,11 +232,23 @@ class _SettingsBodyState extends State<_SettingsBody> {
         ),
         const SizedBox(height: 6),
         const _SectionHeader(label: 'Diagnostics'),
-        const _SettingCard(
+        _SettingCard(
           children: [
-            _DisplayRow(glyph: '#', label: 'App version', value: '0.1.0'),
-            _DisplayRow(glyph: '⇋', label: 'Bridge protocol', value: 'ASCP'),
-            _DisplayRow(glyph: '◷', label: 'Last sync', value: 'Just now'),
+            const _DisplayRow(
+              glyph: '#',
+              label: 'App version',
+              value: _appVersion,
+            ),
+            const _DisplayRow(
+              glyph: '⇋',
+              label: 'Bridge protocol',
+              value: 'ASCP',
+            ),
+            _DisplayRow(
+              glyph: '◷',
+              label: 'Sync state',
+              value: diagnostics.lastError ?? diagnostics.state,
+            ),
           ],
         ),
         const SizedBox(height: 6),
@@ -265,10 +282,14 @@ class _SettingsBodyState extends State<_SettingsBody> {
 }
 
 class _UserSummaryCard extends StatelessWidget {
-  const _UserSummaryCard();
+  const _UserSummaryCard({required this.diagnostics});
+
+  final TransportDiagnostics diagnostics;
 
   @override
   Widget build(BuildContext context) {
+    final hostLabel = diagnostics.hostId;
+    final stateLabel = diagnostics.state;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: SessionColors.cardSurface,
@@ -289,7 +310,7 @@ class _UserSummaryCard extends StatelessWidget {
                 height: 44,
                 child: Center(
                   child: Text(
-                    'MI',
+                    '⌘',
                     style: TextStyle(
                       color: SessionColors.amberText,
                       fontSize: 16,
@@ -304,9 +325,9 @@ class _UserSummaryCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Muhammad',
-                    style: TextStyle(
+                  Text(
+                    'Host: $hostLabel',
+                    style: const TextStyle(
                       color: SessionColors.textDark,
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -314,7 +335,7 @@ class _UserSummaryCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    'MacBook Pro · Local',
+                    stateLabel,
                     style: const TextStyle(
                       color: SessionColors.textSecondary,
                       fontSize: 12,
@@ -325,9 +346,17 @@ class _UserSummaryCard extends StatelessWidget {
             ),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: ContinuumColorTokens.success.withValues(alpha: 0.12),
+                color:
+                    (diagnostics.isDegraded
+                            ? ContinuumColorTokens.danger
+                            : ContinuumColorTokens.success)
+                        .withValues(alpha: 0.12),
                 border: Border.all(
-                  color: ContinuumColorTokens.success.withValues(alpha: 0.3),
+                  color:
+                      (diagnostics.isDegraded
+                              ? ContinuumColorTokens.danger
+                              : ContinuumColorTokens.success)
+                          .withValues(alpha: 0.3),
                 ),
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -339,17 +368,21 @@ class _UserSummaryCard extends StatelessWidget {
                 child: Row(
                   children: [
                     DecoratedBox(
-                      decoration: const BoxDecoration(
-                        color: ContinuumColorTokens.success,
+                      decoration: BoxDecoration(
+                        color: diagnostics.isDegraded
+                            ? ContinuumColorTokens.danger
+                            : ContinuumColorTokens.success,
                         shape: BoxShape.circle,
                       ),
                       child: const SizedBox(width: 5, height: 5),
                     ),
                     const SizedBox(width: 5),
-                    const Text(
-                      'Trusted',
+                    Text(
+                      diagnostics.isDegraded ? 'Degraded' : 'Connected',
                       style: TextStyle(
-                        color: ContinuumColorTokens.success,
+                        color: diagnostics.isDegraded
+                            ? ContinuumColorTokens.danger
+                            : ContinuumColorTokens.success,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),

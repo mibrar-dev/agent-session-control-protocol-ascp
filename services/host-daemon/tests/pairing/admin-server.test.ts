@@ -135,6 +135,18 @@ describe("pairing admin server", () => {
     });
   });
 
+  it("exposes admin diagnostics endpoint", async () => {
+    const daemon = await createPairingHarness();
+    daemonsToClose.add(daemon);
+
+    const diagnostics = await requestJson(daemon.adminUrl, "GET", "/admin/diagnostics");
+    expect(diagnostics).toMatchObject({
+      host_id: "127.0.0.1",
+      replay_enabled: true,
+      state: "connected"
+    });
+  });
+
   it("returns 409 for duplicate claims", async () => {
     const daemon = await createPairingHarness();
     daemonsToClose.add(daemon);
